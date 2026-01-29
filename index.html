@@ -1342,7 +1342,7 @@
             <div>POWERGX INC. MYRON YU（Aka.雪夜叉）</div>
             <div class="audio-ctrl">
                 <label>Audio</label>
-                <input type="checkbox" id="audio-toggle" onchange="audioManager.toggle(this.checked)">
+                <input type="checkbox" id="audio-toggle" checked onchange="audioManager.toggle(this.checked)">
                 <input type="range" id="audio-volume" min="0" max="1" step="0.01" value="0.8"
                     oninput="audioManager.setVolume(this.value)">
                 <label style="margin-left:8px">DPV</label>
@@ -2156,6 +2156,22 @@
             refreshUI();
             loop();
             setInterval(loop, 16);
+
+            // 自动开启音频逻辑 (处理浏览器自动播放策略)
+            const autoEnableAudio = () => {
+                const toggle = document.getElementById('audio-toggle');
+                if (toggle && toggle.checked) {
+                    audioManager.toggle(true);
+                }
+                // 一次性激活后移除监听器
+                window.removeEventListener('click', autoEnableAudio);
+                window.removeEventListener('touchstart', autoEnableAudio);
+            };
+            window.addEventListener('click', autoEnableAudio);
+            window.addEventListener('touchstart', autoEnableAudio);
+
+            // 初始尝试 (如果权限允许则直接开启)
+            setTimeout(autoEnableAudio, 1000);
 
             // Audio Init
             const volSlider = document.getElementById('audio-volume');
