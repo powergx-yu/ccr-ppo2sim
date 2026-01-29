@@ -2163,15 +2163,15 @@
                 if (toggle && toggle.checked) {
                     audioManager.toggle(true);
                 }
-                // 一次性激活后移除监听器
-                window.removeEventListener('click', autoEnableAudio);
-                window.removeEventListener('touchstart', autoEnableAudio);
+                // 一次性激活后彻底移除相关监听
+                ['pointerdown', 'click', 'touchstart'].forEach(evt => {
+                    document.removeEventListener(evt, autoEnableAudio, true);
+                });
             };
-            window.addEventListener('click', autoEnableAudio);
-            window.addEventListener('touchstart', autoEnableAudio);
-
-            // 初始尝试 (如果权限允许则直接开启)
-            setTimeout(autoEnableAudio, 1000);
+            // 使用捕获阶段 (true) 来确保即便事件被滑块拦截也能感知
+            ['pointerdown', 'click', 'touchstart'].forEach(evt => {
+                document.addEventListener(evt, autoEnableAudio, true);
+            });
 
             // Audio Init
             const volSlider = document.getElementById('audio-volume');
