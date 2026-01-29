@@ -629,6 +629,8 @@
             border: 1px solid #333;
             display: flex;
             flex-direction: column;
+            min-height: 180px;
+            /* Force uniform height for alignment */
         }
 
         .panel-title {
@@ -804,11 +806,12 @@
         /* --- Custom Inputs UI --- */
         .custom-control-panel {
             display: none;
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px dashed #444;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid #444;
             border-radius: 4px;
-            padding: 8px;
-            margin-top: 5px;
+            padding: 6px;
+            margin-top: auto;
+            /* Push to bottom of panel */
             animation: slideDown 0.3s ease-out;
         }
 
@@ -819,34 +822,36 @@
         .custom-input-group {
             display: flex;
             align-items: center;
-            gap: 15px;
-            margin-top: 5px;
+            gap: 10px;
         }
 
         .custom-field {
             display: flex;
             flex-direction: column;
-            gap: 2px;
+            gap: 1px;
             flex: 1;
         }
 
         .custom-field label {
-            font-size: 0.6em;
-            color: #666;
+            font-size: 0.55em;
+            color: #888;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .custom-field input[type=range] {
             width: 100%;
-            height: 4px;
+            height: 3px;
+            margin: 4px 0;
             accent-color: var(--accent-blue);
         }
 
         .custom-field .val {
-            font-family: monospace;
-            font-size: 0.8em;
+            font-family: 'Courier New', monospace;
+            font-size: 0.75em;
             color: var(--accent-blue);
             text-align: right;
+            font-weight: bold;
         }
 
         @keyframes slideDown {
@@ -1441,7 +1446,7 @@
                 <div class="panel">
                     <div class="panel-title" style="color:var(--accent-dil); border-color:#112244;">DILUENT GAS</div>
                     <div class="status-bar" id="disp-mod">MOD (1.4): ~ 56 m</div>
-                    <div class="btn-row">
+                    <div class="btn-row" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px;">
                         <button class="btn btn-dil" onclick="setDiluent('Air', 0.21, 0.0)">Air</button>
                         <button class="btn btn-dil active-dil"
                             onclick="setDiluent('Tx 21/35', 0.21, 0.35)">21/35</button>
@@ -1471,11 +1476,12 @@
                 <div class="panel">
                     <div class="panel-title" style="color:var(--accent-orange); border-color:#553300;">METABOLISM</div>
                     <div class="status-bar" id="disp-sac">SAC: ~20 L/min | O2: 1.0 L/min</div>
-                    <div class="btn-row">
+                    <div class="btn-row" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px;">
                         <button class="btn btn-vo2" data-val="0.7" onclick="setVO2(0.7)">Rest</button>
                         <button class="btn btn-vo2 active-vo2" data-val="1.0" onclick="setVO2(1.0)">Norm</button>
                         <button class="btn btn-vo2" data-val="1.5" onclick="setVO2(1.5)">Work</button>
                         <button class="btn btn-vo2" data-val="2.5" onclick="setVO2(2.5)">Stress</button>
+                        <div style="flex:1"></div>
                         <button class="btn btn-vo2 btn-custom" id="btn-vo2-custom"
                             onclick="toggleCustom('vo2')">Custom</button>
                     </div>
