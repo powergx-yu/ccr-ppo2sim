@@ -62,7 +62,8 @@
             justify-content: space-between;
             align-items: flex-end;
             width: 100%;
-            max-width: 950px;
+            max-width: 1200px;
+            /* 增加最大宽度 */
             border-bottom: 1px solid #333;
             padding-bottom: 5px;
             margin-bottom: 5px;
@@ -122,9 +123,24 @@
             height: 3px;
         }
 
+        .stage-container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 1200px;
+            /* 增加最大宽度 */
+            margin-bottom: 8px;
+            position: relative;
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
         .footer-signature {
             width: 100%;
-            max-width: 950px;
+            max-width: 1200px;
+            /* 增加最大宽度 */
             text-align: right;
             color: #3d5a75;
             font-size: 0.75em;
@@ -133,19 +149,6 @@
             font-weight: 600;
             letter-spacing: 2px;
             text-transform: uppercase;
-        }
-
-        .stage-container {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-            max-width: 950px;
-            margin-bottom: 8px;
-            position: relative;
-            background: #111;
-            border: 1px solid #333;
-            border-radius: 12px;
-            overflow: hidden;
         }
 
         .diver-hud-section {
@@ -247,6 +250,65 @@
 
         .cell-box-p:first-child {
             border-left: none;
+        }
+
+        /* --- Tablets & Large Screens Optimization --- */
+        @media (min-width: 700px) {
+            body {
+                padding: 15px;
+            }
+
+            .header-title-sub {
+                font-size: 1.8em;
+            }
+
+            .diver-hud-section {
+                height: 240px;
+                /* 平板上 HUD 更高一些 */
+            }
+
+            .hud-screen {
+                height: 200px;
+                padding: 15px;
+            }
+
+            .hud-left {
+                width: 450px;
+                /* HUD 变宽 */
+            }
+
+            .hud-right {
+                width: 300px;
+            }
+
+            .dc-label {
+                font-size: 0.7em;
+            }
+
+            .dc-val {
+                font-size: 2.5em;
+                /* 数值显著放大 */
+            }
+
+            .dc-val-mid {
+                font-size: 1.8em;
+            }
+
+            .header-container,
+            .stage-container,
+            .footer-signature {
+                max-width: 100%;
+                /* 在特定范围内撑满 */
+            }
+        }
+
+        @media (min-width: 1000px) {
+
+            .header-container,
+            .stage-container,
+            .footer-signature {
+                max-width: 1200px;
+            }
         }
 
         .cell-box-p:last-child {
