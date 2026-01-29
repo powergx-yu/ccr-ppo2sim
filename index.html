@@ -311,6 +311,41 @@
             }
         }
 
+        /* --- Mobile Only (Narrow Screens) --- */
+        @media (max-width: 699px) {
+            .header-container {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .header-left {
+                width: 100%;
+            }
+
+            .header-right {
+                width: 100%;
+                text-align: left;
+                padding-bottom: 5px;
+            }
+
+            .audio-ctrl {
+                width: 100%;
+                justify-content: flex-start;
+            }
+
+            #btn-install {
+                white-space: nowrap !important;
+                /* 禁止换行 */
+                min-width: 70px !important;
+                text-align: center !important;
+            }
+
+            .header-title-sub {
+                font-size: 1.1em !important;
+            }
+        }
+
         .cell-box-p:last-child {
             border-right: none;
         }
@@ -1183,7 +1218,7 @@
             <div style="display:flex; flex-direction:column;">
                 <div style="display:flex; align-items:center; gap:10px;">
                     <div class="header-title-main">POWERGX CCR EDUCATION TOOL</div>
-                    <button id="btn-install"
+                    <button id="btn-install" translate="no"
                         style="background:transparent; color:#00BFFF; border:1px solid #00BFFF; border-radius:3px; cursor:pointer; font-size:0.7em; font-weight:500; letter-spacing:1px; text-transform:uppercase; padding:2px 8px; opacity:0.7; transition:opacity 0.2s;"
                         onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">Install</button>
                 </div>
