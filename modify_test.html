@@ -5,6 +5,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>CCR Pro Simulator v12.1: Seacraft Audio Edition</title>
+    <!-- PWA Settings -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon.jpg">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="CCR Sim">
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').then(reg => {
+                    console.log('SW registered:', reg);
+                }, err => console.log('SW setup failed:', err));
+            });
+        }
+    </script>
     <style>
         /* 全局盒模型修复：这是布局不乱的关键 */
         * {
@@ -1108,6 +1123,9 @@
         <div class="header-right">
             <div>POWERGX INC. MYRON YU（Aka.雪夜叉）</div>
             <div class="audio-ctrl">
+                <button id="btn-install"
+                    style="display:inline-block; background:#00aa00; color:white; border:none; border-radius:3px; cursor:pointer; font-size:10px; margin-right:5px; padding:2px 6px;">INSTALL
+                    (Wait...)</button>
                 <label>Audio</label>
                 <input type="checkbox" id="audio-toggle" onchange="audioManager.toggle(this.checked)">
                 <input type="range" id="audio-volume" min="0" max="1" step="0.01" value="0.8"
@@ -1119,6 +1137,41 @@
             </div>
         </div>
     </div>
+
+    <script>
+        let deferredPrompt;
+        const installBtn = document.getElementById('btn-install');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            console.log('PWA: beforeinstallprompt fired');
+            // Prevent Chrome 67 and earlier from automatically showing the prompt
+            e.preventDefault();
+            // Stash the event so it can be triggered later.
+            deferredPrompt = e;
+            // Update UI to notify the user they can add to home screen
+            installBtn.style.display = 'inline-block';
+
+            installBtn.addEventListener('click', () => {
+                // Show the prompt
+                deferredPrompt.prompt();
+                // Wait for the user to respond to the prompt
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('User accepted the A2HS prompt');
+                    } else {
+                        console.log('User dismissed the A2HS prompt');
+                    }
+                    deferredPrompt = null;
+                    installBtn.style.display = 'none';
+                });
+            });
+        });
+
+        // Debugging logs
+        window.addEventListener('appinstalled', (evt) => {
+            console.log('PWA: App installed');
+        });
+    </script>
 
     <div class="stage-container">
         <div class="diver-hud-section">
@@ -1828,4 +1881,3 @@
 </body>
 
 </html>
-```
