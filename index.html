@@ -1570,9 +1570,10 @@
                         <div class="slider-row"><span class="row-label-text" id="label-needle-flow">FLOW
                                 RATE</span><input type="range" id="slider-needle" min="0.0" max="2.0" step="0.1"
                                 value="0.8"
-                                oninput="params.needleBase=parseFloat(this.value); updateUIVal('disp-needle-val', this.value + ' L/m');"><span
+                                oninput="params.needleBase=parseFloat(this.value); updateUIVal('disp-needle-val', parseFloat(this.value).toFixed(1) + ' L/min');"><span
                                 id="disp-needle-val"
-                                style="width:40px; text-align:right; font-family:monospace; color:#aaa;">0.8 L/m</span>
+                                style="width:50px; text-align:right; font-family:monospace; color:#aaa;">0.8
+                                L/min</span>
                         </div>
                         <div style="display:flex; align-items:center; gap:5px; font-size:0.75em; margin-top:3px;">
                             <input type="checkbox" id="chk-uncomp" onchange="params.needleUncompensated = this.checked">
