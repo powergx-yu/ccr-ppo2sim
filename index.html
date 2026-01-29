@@ -1428,7 +1428,7 @@
             <div class="vert-slider-group">
                 <div class="vert-val" id="val-sp-display" style="color:var(--accent-blue)">1.2</div>
                 <input type="range" orient="vertical" min="0.7" max="1.6" step="0.1" value="1.2"
-                    oninput="params.visualSP=parseFloat(this.value); updateSlowUI();">
+                    oninput="params.visualSP=parseFloat(this.value); refreshUI();">
             </div>
             <div style="width:100%; height:1px; background:#333; margin:5px 0;"></div>
             <div class="panel-title"
@@ -1901,7 +1901,7 @@
             updateUIVal('disp-o2-he', `${o2}/${he}`);
             const mod = (1.4 / params.diluentFO2 - 1) * 10;
             updateUIVal('disp-mod', `MOD (1.4): ~ ${mod.toFixed(0)} m`);
-            updateSlowUI();
+            refreshUI();
         }
 
         function applyCustomVO2() {
@@ -1918,7 +1918,7 @@
 
             params.metabolism = sac / 20;
             updateUIVal('disp-sac', `SAC: ~${sac.toFixed(0)} L/min | O2: ${(sac / 20).toFixed(1)} L/min`);
-            updateSlowUI();
+            refreshUI();
         }
 
         function setDiluent(name, fo2, fhe) {
@@ -1930,13 +1930,13 @@
             params.diluentFO2 = fo2; params.diluentFHe = fhe;
             document.querySelectorAll('.btn-dil').forEach(btn => btn.classList.toggle('active-dil', btn.innerText.includes(name.split(' ')[1] || name)));
             updateUIVal('disp-mod', `MOD (1.4): ~ ${Math.floor((1.4 / fo2 - 1) * 10)} m`);
-            updateUIVal('disp-o2-he', (fo2 * 100).toFixed(0) + '/' + (fhe * 100).toFixed(0)); updateSlowUI();
+            updateUIVal('disp-o2-he', (fo2 * 100).toFixed(0) + '/' + (fhe * 100).toFixed(0)); refreshUI();
         }
 
         function setDepth(m) {
             let oldATA = params.depthATA; params.depthM = parseFloat(m); params.depthATA = (params.depthM / 10) + 1;
             let ratio = params.depthATA / oldATA;
-            params.po2 = Math.min(params.depthATA, params.po2 * ratio); params.displayPo2 = params.po2; updateSlowUI();
+            params.po2 = Math.min(params.depthATA, params.po2 * ratio); params.displayPo2 = params.po2; refreshUI();
         }
 
         function setVO2(val) {
@@ -1945,7 +1945,7 @@
             document.getElementById('btn-vo2-custom').classList.remove('active-custom');
             panel.classList.remove('active');
             panel.querySelectorAll('input').forEach(input => input.disabled = true);
-            params.metabolism = val; document.querySelectorAll('.btn-vo2').forEach(btn => btn.classList.toggle('active-vo2', Math.abs(parseFloat(btn.dataset.val) - val) < 0.01)); updateUIVal('disp-sac', `SAC: ~${(val * 20).toFixed(0)} L/min | O2: ${val.toFixed(1)} L/min`); updateSlowUI();
+            params.metabolism = val; document.querySelectorAll('.btn-vo2').forEach(btn => btn.classList.toggle('active-vo2', Math.abs(parseFloat(btn.dataset.val) - val) < 0.01)); updateUIVal('disp-sac', `SAC: ~${(val * 20).toFixed(0)} L/min | O2: ${val.toFixed(1)} L/min`); refreshUI();
         }
 
         function setMode(mode) {
@@ -1967,7 +1967,7 @@
         function startInject(t) { if (t === 'o2') manualO2 = true; else manualDil = true; audioManager.setHiss(true); }
         function stopInject() { manualO2 = false; manualDil = false; audioManager.setHiss(false); }
         function setCMF(v) { params.cmfRate = v; document.querySelectorAll('.btn-cmf').forEach(btn => btn.classList.toggle('active-cmf', Math.abs(parseFloat(btn.dataset.val) - v) < 0.01)); }
-        function setComputerSP(v) { params.computerSP = v; document.querySelectorAll('.btn-sp').forEach(btn => btn.classList.toggle('active-sp', Math.abs(parseFloat(btn.dataset.val) - v) < 0.01)); updateSlowUI(); }
+        function setComputerSP(v) { params.computerSP = v; document.querySelectorAll('.btn-sp').forEach(btn => btn.classList.toggle('active-sp', Math.abs(parseFloat(btn.dataset.val) - v) < 0.01)); refreshUI(); }
 
         function loop() {
             const now = Date.now(); let dt = now - lastTime; if (dt > 100) dt = 16; lastTime = now;
@@ -2089,14 +2089,27 @@
         }
 
         function updateSlowUI() {
+            // This handles the periodic data recording (0.8s interval)
+            history.push(params.displayPo2);
+            if (history.length > maxHistory) history.shift();
+
+            // Also refresh visual elements
+            refreshUI();
+        }
+
+        function refreshUI() {
+            // This handles the visual display updates only
             params.cells = params.cells.map(() => Math.max(0, params.displayPo2 + Math.random() * 0.04 - 0.02));
             const avg = params.cells.reduce((a, b) => a + b) / 3;
             updateUIVal('disp-po2', avg.toFixed(2));
-            updateUIVal('cell-1', params.cells[0].toFixed(2)); updateUIVal('cell-2', params.cells[1].toFixed(2)); updateUIVal('cell-3', params.cells[2].toFixed(2));
-            updateUIVal('disp-setpoint', params.computerSP.toFixed(2)); updateUIVal('val-sp-display', params.visualSP.toFixed(1));
-            updateUIVal('disp-depth', params.depthM + 'm'); updateUIVal('val-depth-display', params.depthM);
+            updateUIVal('cell-1', params.cells[0].toFixed(2));
+            updateUIVal('cell-2', params.cells[1].toFixed(2));
+            updateUIVal('cell-3', params.cells[2].toFixed(2));
+            updateUIVal('disp-setpoint', params.computerSP.toFixed(2));
+            updateUIVal('val-sp-display', params.visualSP.toFixed(1));
+            updateUIVal('disp-depth', params.depthM + 'm');
+            updateUIVal('val-depth-display', params.depthM);
             updateDiverStatus(avg);
-            history.push(params.displayPo2); if (history.length > maxHistory) history.shift();
         }
 
         const ctx = document.getElementById('chartCanvas').getContext('2d');
@@ -2126,7 +2139,7 @@
             setMode('manual');
             setVO2(1.0);
             setDepth(10);
-            updateSlowUI();
+            refreshUI();
             loop();
             setInterval(loop, 16);
 
