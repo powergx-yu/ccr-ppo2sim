@@ -1,6 +1,6 @@
 {
-    "name": "CCR PPO2 Simulator",
-    "short_name": "CCR Sim",
+    "name": "CCR PPO2 Simulator V12.1",
+    "short_name": "CCR PPO2",
     "start_url": "./index.html",
     "display": "standalone",
     "background_color": "#030512",
