@@ -847,8 +847,15 @@
         .custom-field {
             display: flex;
             flex-direction: column;
-            gap: 1px;
+            gap: 2px;
             flex: 1;
+        }
+
+        .field-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: -2px;
         }
 
         .custom-field label {
@@ -856,6 +863,7 @@
             color: #888;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            margin: 0;
         }
 
         .custom-field input[type=range] {
@@ -874,7 +882,6 @@
             font-size: 0.75em;
             color: #444;
             /* Dim by default */
-            text-align: right;
             font-weight: bold;
             transition: color 0.3s;
         }
@@ -1493,16 +1500,20 @@
                     <div id="panel-dil-custom" class="custom-control-panel">
                         <div class="custom-input-group">
                             <div class="custom-field">
-                                <label>Oxygen (O2%)</label>
+                                <div class="field-header">
+                                    <label>Oxygen (O2%)</label>
+                                    <div class="val" id="val-dil-o2">21%</div>
+                                </div>
                                 <input type="range" id="input-dil-o2" min="5" max="100" value="21"
                                     oninput="applyCustomDil()" disabled>
-                                <div class="val" id="val-dil-o2">21%</div>
                             </div>
                             <div class="custom-field">
-                                <label>Helium (He%)</label>
+                                <div class="field-header">
+                                    <label>Helium (He%)</label>
+                                    <div class="val" id="val-dil-he">0%</div>
+                                </div>
                                 <input type="range" id="input-dil-he" min="0" max="95" value="0"
                                     oninput="applyCustomDil()" disabled>
-                                <div class="val" id="val-dil-he">0%</div>
                             </div>
                         </div>
                     </div>
@@ -1523,10 +1534,12 @@
                     <div id="panel-vo2-custom" class="custom-control-panel">
                         <div class="custom-input-group">
                             <div class="custom-field">
-                                <label>Custom SAC (L/min)</label>
+                                <div class="field-header">
+                                    <label>Custom SAC (L/min)</label>
+                                    <div class="val" id="val-vo2">20 L/min</div>
+                                </div>
                                 <input type="range" id="input-vo2" min="10" max="80" step="1" value="20"
                                     oninput="applyCustomVO2()" disabled>
-                                <div class="val" id="val-vo2">20 L/min</div>
                             </div>
                         </div>
                     </div>
