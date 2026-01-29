@@ -111,23 +111,28 @@
             border: 1px solid #222;
         }
 
-        /* 音频开启视觉诱导动画 */
+        /* 音频开启视觉诱导动画 - 强化呼吸效果 */
         .audio-prompt-pulse {
-            animation: audioPulse 2s infinite;
-            border-color: var(--accent-blue) !important;
+            animation: audioPulse 1.5s infinite ease-in-out;
         }
 
         @keyframes audioPulse {
             0% {
                 box-shadow: 0 0 0px rgba(0, 229, 255, 0);
+                border-color: #222;
+                background: rgba(255, 255, 255, 0.03);
             }
 
             50% {
-                box-shadow: 0 0 12px rgba(0, 229, 255, 0.5);
+                box-shadow: 0 0 15px rgba(0, 229, 255, 0.6);
+                border-color: var(--accent-blue);
+                background: rgba(0, 229, 255, 0.15);
             }
 
             100% {
                 box-shadow: 0 0 0px rgba(0, 229, 255, 0);
+                border-color: #222;
+                background: rgba(255, 255, 255, 0.03);
             }
         }
 
