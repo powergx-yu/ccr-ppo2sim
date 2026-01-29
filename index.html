@@ -849,9 +849,16 @@
         .custom-field .val {
             font-family: 'Courier New', monospace;
             font-size: 0.75em;
-            color: var(--accent-blue);
+            color: #444;
+            /* Dim by default */
             text-align: right;
             font-weight: bold;
+            transition: color 0.3s;
+        }
+
+        .custom-control-panel.active .val {
+            color: var(--accent-blue);
+            /* Bright when active */
         }
 
         @keyframes slideDown {
@@ -1481,7 +1488,8 @@
                         <button class="btn btn-vo2 active-vo2" data-val="1.0" onclick="setVO2(1.0)">Norm</button>
                         <button class="btn btn-vo2" data-val="1.5" onclick="setVO2(1.5)">Work</button>
                         <button class="btn btn-vo2" data-val="2.5" onclick="setVO2(2.5)">Stress</button>
-                        <div style="flex:1"></div>
+                        <button class="btn btn-vo2" data-val="3.5" onclick="setVO2(3.5)"
+                            style="color:#ff3333; border-color:#550000;">Panic</button>
                         <button class="btn btn-vo2 btn-custom" id="btn-vo2-custom"
                             onclick="toggleCustom('vo2')">Custom</button>
                     </div>
