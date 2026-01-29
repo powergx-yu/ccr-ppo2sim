@@ -1523,10 +1523,10 @@
                     <div id="panel-vo2-custom" class="custom-control-panel">
                         <div class="custom-input-group">
                             <div class="custom-field">
-                                <label>Metabolism (VO2 L/min)</label>
-                                <input type="range" id="input-vo2" min="0.3" max="4.0" step="0.1" value="1.0"
+                                <label>Custom SAC (L/min)</label>
+                                <input type="range" id="input-vo2" min="10" max="80" step="1" value="20"
                                     oninput="applyCustomVO2()" disabled>
-                                <div class="val" id="val-vo2">1.0 L/min</div>
+                                <div class="val" id="val-vo2">20 L/min</div>
                             </div>
                         </div>
                     </div>
@@ -1905,8 +1905,8 @@
         }
 
         function applyCustomVO2() {
-            const val = parseFloat(document.getElementById('input-vo2').value);
-            document.getElementById('val-vo2').innerText = val.toFixed(1) + ' L/min';
+            const sac = parseFloat(document.getElementById('input-vo2').value);
+            document.getElementById('val-vo2').innerText = sac.toFixed(0) + ' L/min';
 
             // Highlight custom button correctly
             document.querySelectorAll('.btn-vo2').forEach(b => b.classList.remove('active-vo2'));
@@ -1916,8 +1916,8 @@
             panel.classList.add('active');
             panel.querySelectorAll('input').forEach(input => input.disabled = false);
 
-            params.metabolism = val;
-            updateUIVal('disp-sac', `SAC: ~${(val * 20).toFixed(0)} L/min | O2: ${val.toFixed(1)} L/min`);
+            params.metabolism = sac / 20;
+            updateUIVal('disp-sac', `SAC: ~${sac.toFixed(0)} L/min | O2: ${(sac / 20).toFixed(1)} L/min`);
             updateSlowUI();
         }
 
