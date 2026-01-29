@@ -801,73 +801,6 @@
             line-height: 16px;
         }
 
-        /* --- Custom Inputs UI --- */
-        .custom-control-panel {
-            display: none;
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px dashed #444;
-            border-radius: 4px;
-            padding: 8px;
-            margin-top: 5px;
-            animation: slideDown 0.3s ease-out;
-        }
-
-        .custom-control-panel.active {
-            display: block;
-        }
-
-        .custom-input-group {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-top: 5px;
-        }
-
-        .custom-field {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-            flex: 1;
-        }
-
-        .custom-field label {
-            font-size: 0.6em;
-            color: #666;
-            text-transform: uppercase;
-        }
-
-        .custom-field input[type=range] {
-            width: 100%;
-            height: 4px;
-            accent-color: var(--accent-blue);
-        }
-
-        .custom-field .val {
-            font-family: monospace;
-            font-size: 0.8em;
-            color: var(--accent-blue);
-            text-align: right;
-        }
-
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-5px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .btn-custom.active-custom {
-            border-color: #ffaa00 !important;
-            color: #ffaa00 !important;
-            background: #332200 !important;
-            box-shadow: 0 0 10px rgba(255, 170, 0, 0.3);
-        }
-
         .slider-row {
             display: flex;
             align-items: center;
@@ -1448,24 +1381,6 @@
                         <button class="btn btn-dil" onclick="setDiluent('Tx 18/45', 0.18, 0.45)">18/45</button>
                         <button class="btn btn-dil" onclick="setDiluent('Tx 15/55', 0.15, 0.55)">15/55</button>
                         <button class="btn btn-dil" onclick="setDiluent('Tx 10/70', 0.10, 0.70)">10/70</button>
-                        <button class="btn btn-dil btn-custom" id="btn-dil-custom"
-                            onclick="toggleCustom('dil')">Custom</button>
-                    </div>
-                    <div id="panel-dil-custom" class="custom-control-panel">
-                        <div class="custom-input-group">
-                            <div class="custom-field">
-                                <label>Oxygen (O2%)</label>
-                                <input type="range" id="input-dil-o2" min="5" max="100" value="21"
-                                    oninput="applyCustomDil()">
-                                <div class="val" id="val-dil-o2">21%</div>
-                            </div>
-                            <div class="custom-field">
-                                <label>Helium (He%)</label>
-                                <input type="range" id="input-dil-he" min="0" max="95" value="0"
-                                    oninput="applyCustomDil()">
-                                <div class="val" id="val-dil-he">0%</div>
-                            </div>
-                        </div>
                     </div>
                 </div>
                 <div class="panel">
@@ -1476,18 +1391,6 @@
                         <button class="btn btn-vo2 active-vo2" data-val="1.0" onclick="setVO2(1.0)">Norm</button>
                         <button class="btn btn-vo2" data-val="1.5" onclick="setVO2(1.5)">Work</button>
                         <button class="btn btn-vo2" data-val="2.5" onclick="setVO2(2.5)">Stress</button>
-                        <button class="btn btn-vo2 btn-custom" id="btn-vo2-custom"
-                            onclick="toggleCustom('vo2')">Custom</button>
-                    </div>
-                    <div id="panel-vo2-custom" class="custom-control-panel">
-                        <div class="custom-input-group">
-                            <div class="custom-field">
-                                <label>Metabolism (VO2 L/min)</label>
-                                <input type="range" id="input-vo2" min="0.3" max="4.0" step="0.1" value="1.0"
-                                    oninput="applyCustomVO2()">
-                                <div class="val" id="val-vo2">1.0 L/min</div>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -1824,58 +1727,7 @@
 
         function updateUIVal(id, val) { const el = document.getElementById(id); if (el) el.innerText = val; }
 
-        // --- Custom Inputs Logic ---
-        function toggleCustom(type) {
-            const panel = document.getElementById(`panel-${type}-custom`);
-            const btn = document.getElementById(`btn-${type}-custom`);
-            const isActive = panel.classList.toggle('active');
-            btn.classList.toggle('active-custom', isActive);
-
-            if (isActive) {
-                if (type === 'dil') applyCustomDil();
-                else if (type === 'vo2') applyCustomVO2();
-            }
-        }
-
-        function applyCustomDil() {
-            const o2 = parseInt(document.getElementById('input-dil-o2').value);
-            const he = parseInt(document.getElementById('input-dil-he').value);
-            document.getElementById('val-dil-o2').innerText = o2 + '%';
-            document.getElementById('val-dil-he').innerText = he + '%';
-
-            // Ensure Custom button is highlighed and others are not
-            document.querySelectorAll('.btn-dil').forEach(b => b.classList.remove('active-dil'));
-            document.getElementById('btn-dil-custom').classList.add('active-custom');
-            document.getElementById('panel-dil-custom').classList.add('active');
-
-            params.diluentFO2 = o2 / 100;
-            params.diluentFHe = he / 100;
-            params.diluentFN2 = 1 - params.diluentFO2 - params.diluentFHe;
-
-            updateUIVal('disp-o2-he', `${o2}/${he}`);
-            const mod = (1.4 / params.diluentFO2 - 1) * 10;
-            updateUIVal('disp-mod', `MOD (1.4): ~ ${mod.toFixed(0)} m`);
-            updateSlowUI();
-        }
-
-        function applyCustomVO2() {
-            const val = parseFloat(document.getElementById('input-vo2').value);
-            document.getElementById('val-vo2').innerText = val.toFixed(1) + ' L/min';
-
-            // Highlight custom button correctly
-            document.querySelectorAll('.btn-vo2').forEach(b => b.classList.remove('active-vo2'));
-            document.getElementById('btn-vo2-custom').classList.add('active-custom');
-            document.getElementById('panel-vo2-custom').classList.add('active');
-
-            params.metabolism = val;
-            updateUIVal('disp-sac', `SAC: ~${(val * 20).toFixed(0)} L/min | O2: ${val.toFixed(1)} L/min`);
-            updateSlowUI();
-        }
-
         function setDiluent(name, fo2, fhe) {
-            // Close custom panel if selecting a preset
-            document.getElementById('btn-dil-custom').classList.remove('active-custom');
-            document.getElementById('panel-dil-custom').classList.remove('active');
             params.diluentFO2 = fo2; params.diluentFHe = fhe;
             document.querySelectorAll('.btn-dil').forEach(btn => btn.classList.toggle('active-dil', btn.innerText.includes(name.split(' ')[1] || name)));
             updateUIVal('disp-mod', `MOD (1.4): ~ ${Math.floor((1.4 / fo2 - 1) * 10)} m`);
@@ -1888,12 +1740,7 @@
             params.po2 = Math.min(params.depthATA, params.po2 * ratio); params.displayPo2 = params.po2; updateSlowUI();
         }
 
-        function setVO2(val) {
-            // Close custom panel if selecting a preset
-            document.getElementById('btn-vo2-custom').classList.remove('active-custom');
-            document.getElementById('panel-vo2-custom').classList.remove('active');
-            params.metabolism = val; document.querySelectorAll('.btn-vo2').forEach(btn => btn.classList.toggle('active-vo2', Math.abs(parseFloat(btn.dataset.val) - val) < 0.01)); updateUIVal('disp-sac', `SAC: ~${(val * 20).toFixed(0)} L/min | O2: ${val.toFixed(1)} L/min`); updateSlowUI();
-        }
+        function setVO2(val) { params.metabolism = val; document.querySelectorAll('.btn-vo2').forEach(btn => btn.classList.toggle('active-vo2', Math.abs(parseFloat(btn.dataset.val) - val) < 0.01)); updateUIVal('disp-sac', `SAC: ~${(val * 20).toFixed(0)} L/min | O2: ${val.toFixed(1)} L/min`); updateSlowUI(); }
 
         function setMode(mode) {
             params.mode = mode;
