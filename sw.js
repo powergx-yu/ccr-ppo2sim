@@ -1,8 +1,9 @@
-const CACHE_NAME = 'ccr-sim-v10';
+const CACHE_NAME = 'ccr-sim-v11';
 const ASSETS_TO_CACHE = [
     './index.html',
     './manifest.json',
-    './icon.jpg'
+    './icon.jpg',
+    './powergxicon.png'
 ];
 
 self.addEventListener('install', (event) => {
