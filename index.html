@@ -2031,6 +2031,7 @@
                         solenoidTimer = 0;
                         if (params.po2 < params.computerSP - 0.005) {
                             let msNeeded = ((0.08 * params.loopVolume) / params.depthATA / params.solenoidRate) * 60000;
+                            if (params.mode === 'hybrid') msNeeded *= 0.5; // Hybrid mode: Halve pulse to reduce PPO2 spikes (rEvo style)
                             params.currentPulseLimit = Math.max(100, Math.min(2500, msNeeded));
                             solenoidShouldFire = true;
                         } else { solenoidShouldFire = false; }
