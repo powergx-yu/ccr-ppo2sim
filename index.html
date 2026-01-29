@@ -1,0 +1,1882 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CCR Pro Simulator v12.1: Seacraft Audio Edition</title>
+    <!-- PWA Settings -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon.jpg">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="CCR Sim">
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').then(reg => {
+                    console.log('SW registered:', reg);
+                }, err => console.log('SW setup failed:', err));
+            });
+        }
+    </script>
+    <style>
+        /* 全局盒模型修复：这是布局不乱的关键 */
+        * {
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-color: #030512;
+            --panel-bg: #181818;
+            --text-color: #ccc;
+            --accent-green: #00ff41;
+            --accent-blue: #00e5ff;
+            --accent-orange: #ffaa00;
+            --accent-purple: #df00ff;
+            --accent-dil: #2b57ff;
+            --accent-depth: #FFD700;
+            --danger-high: #ff3333;
+            --danger-low: #bc13fe;
+            --danger-narc: #ff00ff;
+            --hud-bg: #050505;
+            --hud-border: #333;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 5px;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* --- 框架布局 --- */
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            width: 100%;
+            max-width: 950px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 5px;
+            margin-bottom: 5px;
+        }
+
+        .header-left {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header-title-main {
+            color: #00BFFF;
+            font-size: 0.8em;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 0;
+        }
+
+        .header-title-sub {
+            color: #ffffff;
+            font-size: 1.4em;
+            font-weight: bold;
+            letter-spacing: 1px;
+            line-height: 1.0;
+        }
+
+        .header-right {
+            color: #666;
+            font-size: 0.75em;
+            text-align: right;
+            font-weight: bold;
+            padding-bottom: 2px;
+            position: relative;
+        }
+
+        .audio-ctrl {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 4px;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid #222;
+        }
+
+        .audio-ctrl label {
+            font-size: 9px;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .audio-ctrl input[type=range] {
+            width: 60px;
+            height: 3px;
+        }
+
+        .footer-signature {
+            width: 100%;
+            max-width: 950px;
+            text-align: right;
+            color: #3d5a75;
+            font-size: 0.75em;
+            margin-top: 10px;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .stage-container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 950px;
+            margin-bottom: 8px;
+            position: relative;
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .diver-hud-section {
+            height: 180px;
+            display: flex;
+            justify-content: space-evenly;
+            align-items: center;
+            background: radial-gradient(circle at center, #222 0%, #000 100%);
+            position: relative;
+            z-index: 2;
+            padding: 5px;
+            border-bottom: 1px solid #333;
+        }
+
+        /* --- HUD / Dive Computer Style --- */
+        .hud-screen {
+            height: 150px;
+            background: var(--hud-bg);
+            border: 2px solid var(--hud-border);
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .hud-left {
+            width: 320px;
+            transform: perspective(600px) rotateY(5deg);
+            border-color: #444;
+        }
+
+        .hud-right {
+            width: 220px;
+            align-items: flex-start;
+            transform: perspective(600px) rotateY(-5deg);
+            border-color: #222;
+        }
+
+        /* Generic Dive Computer (DC) Styles (Renamed from Petrel) */
+        .dc-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            width: 100%;
+            height: 33%;
+            border-bottom: 1px solid #222;
+            align-items: center;
+        }
+
+        .dc-row:last-child {
+            border-bottom: none;
+        }
+
+        .dc-item {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .dc-item-center {
+            align-items: center;
+            text-align: center;
+        }
+
+        .dc-item-right {
+            align-items: flex-end;
+            text-align: right;
+        }
+
+        .dc-label {
+            color: var(--accent-blue);
+            font-size: 0.55em;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .dc-val {
+            color: #ffffff;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            font-size: 1.8em;
+            line-height: 1.0;
+        }
+
+        .dc-val-mid {
+            font-size: 1.3em;
+        }
+
+        .cell-box-p {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border-left: 1px solid #222;
+            border-right: 1px solid #222;
+        }
+
+        .cell-box-p:first-child {
+            border-left: none;
+        }
+
+        .cell-box-p:last-child {
+            border-right: none;
+        }
+
+        /* --- 告警状态颜色 --- */
+        .val-alarm-red {
+            color: #ff3333 !important;
+        }
+
+        .val-alarm-purple {
+            color: #bc13fe !important;
+        }
+
+        .hud-right.status-ok {
+            border-color: #222;
+        }
+
+        .hud-right.status-high {
+            border-color: var(--danger-high);
+            box-shadow: 0 0 15px rgba(255, 50, 50, 0.3);
+        }
+
+        .hud-right.status-low {
+            border-color: var(--danger-low);
+            box-shadow: 0 0 15px rgba(150, 0, 255, 0.3);
+        }
+
+        .hud-right.status-narc {
+            border-color: var(--danger-narc);
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0.2);
+        }
+
+        .alert-title {
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #444;
+            border-bottom: 1px solid #333;
+            width: 100%;
+            padding-bottom: 4px;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+
+        .alert-list {
+            padding-left: 15px;
+            margin: 0;
+            color: #888;
+            font-size: 0.85em;
+            line-height: 1.5;
+            list-style-type: square;
+        }
+
+        /* --- 潜水员头像 --- */
+        .diver-visual-wrapper {
+            width: 100px;
+            height: 100px;
+            position: relative;
+            z-index: 5;
+            margin-top: 5px;
+            animation: breathing-anim 4s infinite ease-in-out;
+        }
+
+        .head-shape {
+            width: 90px;
+            height: 100px;
+            background: #d4b997;
+            border-radius: 50% 50% 40% 40%;
+            position: absolute;
+            left: 5px;
+            box-shadow: inset -4px -4px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .mask-frame {
+            width: 100px;
+            height: 60px;
+            background: #111;
+            border: 2.5px solid #444;
+            border-radius: 20px;
+            position: absolute;
+            top: 20px;
+            box-shadow: 0 2px 4px #000;
+        }
+
+        .mask-lens {
+            width: 90px;
+            height: 50px;
+            background: rgba(0, 150, 255, 0.15);
+            border-radius: 15px;
+            position: absolute;
+            top: 2.5px;
+            left: 2.5px;
+        }
+
+        .eye-group {
+            position: absolute;
+            top: 40px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .eye {
+            width: 16px;
+            height: 16px;
+            background: #eee;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            transition: 0.3s;
+        }
+
+        .pupil {
+            width: 6px;
+            height: 6px;
+            background: #000;
+            border-radius: 50%;
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            transition: 0.3s;
+        }
+
+        .dsv-block {
+            width: 70px;
+            height: 25px;
+            background: linear-gradient(#333, #111);
+            border: 2.5px solid #555;
+            border-radius: 6px;
+            position: absolute;
+            bottom: 0px;
+            left: 15px;
+        }
+
+        .state-hyperoxia {
+            animation: twitch-shake 0.2s infinite !important;
+        }
+
+        .state-hyperoxia .eye {
+            box-shadow: 0 0 6px red;
+        }
+
+        .state-hyperoxia .pupil {
+            width: 2px;
+            height: 2px;
+            transform: scale(0.5);
+        }
+
+        .state-hypoxia {
+            transform: translateY(8px) rotate(5deg);
+            filter: grayscale(1) brightness(0.6);
+        }
+
+        .state-hypoxia .eye {
+            height: 2px;
+            top: 7px;
+            background: #555;
+        }
+
+        .state-hypoxia .pupil {
+            display: none;
+        }
+
+        .state-narcosis {
+            filter: blur(0.6px);
+        }
+
+        @keyframes twitch-shake {
+
+            0%,
+            100% {
+                transform: rotate(0deg);
+            }
+
+            25% {
+                transform: rotate(1.5deg);
+            }
+
+            75% {
+                transform: rotate(-1.5deg);
+            }
+        }
+
+        @keyframes breathing-anim {
+
+            0%,
+            100% {
+                transform: scale(1) translateY(0);
+            }
+
+            50% {
+                transform: scale(1.03) translateY(-3px);
+            }
+        }
+
+        /* Chart */
+        .chart-body {
+            width: 100%;
+            height: 180px;
+            background: #000;
+            position: relative;
+            z-index: 0;
+        }
+
+        #chartCanvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* --- 控制面板 --- */
+        .main-controls {
+            display: grid;
+            grid-template-columns: 100px 1fr 140px;
+            gap: 8px;
+            width: 100%;
+            max-width: 950px;
+        }
+
+        .vertical-panel {
+            background: #181818;
+            border: 1px solid #333;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            padding: 10px 5px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .vert-slider-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 42%;
+            width: 100%;
+        }
+
+        input[type=range][orient=vertical] {
+            writing-mode: bt-lr;
+            -webkit-appearance: slider-vertical;
+            width: 8px;
+            flex: 1;
+            margin: 5px 0;
+            accent-color: #666;
+        }
+
+        .inverted-slider {
+            transform: scaleY(-1);
+        }
+
+        .vert-label {
+            font-size: 0.65em;
+            color: #888;
+            text-align: center;
+            margin-bottom: 2px;
+        }
+
+        .vert-val {
+            font-family: monospace;
+            font-size: 0.8em;
+            color: #ccc;
+            margin-top: 2px;
+        }
+
+        .middle-column {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .split-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .panel {
+            background: var(--panel-bg);
+            padding: 8px 10px;
+            border-radius: 6px;
+            border: 1px solid #333;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-title {
+            font-size: 0.75em;
+            color: #888;
+            margin-bottom: 6px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 3px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 3px;
+            margin-bottom: 5px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            flex: 1;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            color: #aaa;
+            padding: 5px 0;
+            font-size: 0.75em;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: 0.2s;
+            min-width: 40px;
+        }
+
+        .btn:hover {
+            background: #3a3a3a;
+            color: #fff;
+        }
+
+        .btn.active {
+            background: #005500;
+            border-color: var(--accent-green);
+            color: #fff;
+            font-weight: bold;
+            box-shadow: 0 0 5px rgba(0, 255, 0, 0.2);
+        }
+
+        .btn-vo2.active-vo2 {
+            border-color: var(--accent-orange);
+            color: var(--accent-orange);
+            background: #332200;
+        }
+
+        .btn-dil {
+            border: 1px solid #223355;
+        }
+
+        .btn-dil.active-dil {
+            border-color: var(--accent-dil);
+            color: #fff;
+            background: #112244;
+            font-weight: bold;
+        }
+
+        .btn-cmf.active-cmf {
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+            background: #003300;
+        }
+
+        .btn-sp {
+            border-color: var(--accent-blue);
+        }
+
+        .btn-sp.active-sp {
+            background: #003344;
+            color: var(--accent-blue);
+            border-color: var(--accent-blue);
+        }
+
+        .row-label-text {
+            font-size: 0.65em;
+            color: #666;
+            white-space: nowrap;
+            width: 90px;
+            transition: color 0.3s;
+        }
+
+        .mav-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            background: #151515;
+            border-radius: 6px;
+            border: 1px solid #282828;
+            padding: 10px 0;
+            box-shadow: inset 0 0 15px #000;
+        }
+
+        .mav-btn-round {
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            border: 3px solid #333;
+            background: radial-gradient(circle at 35% 35%, #4a4a4a, #0a0a0a);
+            color: #888;
+            font-size: 1.0em;
+            font-weight: 900;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.8), inset 0 2px 4px rgba(255, 255, 255, 0.1);
+            transition: all 0.1s ease-in-out;
+            position: relative;
+            text-shadow: 0 -1px 1px #000;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+
+        .mav-btn-round:active {
+            transform: scale(0.94);
+            background: radial-gradient(circle at 35% 35%, #2a2a2a, #000);
+            border-color: #222;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+        }
+
+        .mav-o2 {
+            color: #00aa22;
+            border-color: #004411;
+        }
+
+        .mav-o2.active-key {
+            background: radial-gradient(circle at center, #00ff41, #004400);
+            color: #000;
+            box-shadow: 0 0 20px var(--accent-green);
+            border-color: #fff;
+        }
+
+        .mav-dil {
+            color: #2255ff;
+            border-color: #112266;
+        }
+
+        .mav-dil.active-key {
+            background: radial-gradient(circle at center, var(--accent-dil), #001144);
+            color: #fff;
+            box-shadow: 0 0 20px var(--accent-dil);
+            border-color: #fff;
+        }
+
+        .disabled-area {
+            opacity: 0.2;
+            pointer-events: none;
+            filter: grayscale(1);
+            transition: opacity 0.3s;
+        }
+
+        .status-bar {
+            font-size: 0.65em;
+            color: #aaa;
+            margin-bottom: 5px;
+            text-align: center;
+            background: #111;
+            padding: 2px;
+            border-radius: 3px;
+            height: 16px;
+            line-height: 16px;
+        }
+
+        .slider-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 0;
+            font-size: 0.8em;
+            background: #111;
+            padding: 6px;
+            border-radius: 4px;
+        }
+
+        input[type=range] {
+            flex: 1;
+            accent-color: #666;
+            cursor: pointer;
+            height: 4px;
+        }
+
+        .injection-matrix-container {
+            width: 100%;
+            height: 70px;
+            background: #080808;
+            border: 1px solid #222;
+            border-radius: 6px;
+            margin-top: 5px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            padding: 2px 6px;
+            gap: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nozzle-box {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+
+        .nozzle-label {
+            font-size: 0.55em;
+            color: #555;
+            position: absolute;
+            top: 2px;
+            white-space: nowrap;
+            pointer-events: none;
+            text-transform: uppercase;
+        }
+
+        .nozzle-unit {
+            display: flex;
+            align-items: center;
+            z-index: 5;
+            margin-bottom: 4px;
+        }
+
+        .nozzle-body {
+            width: 75px;
+            height: 10px;
+            background: linear-gradient(#444, #222);
+            border: 1px solid #555;
+            border-radius: 1px;
+        }
+
+        .nozzle-tip {
+            width: 8px;
+            height: 6px;
+            background: #666;
+            border: 1px solid #777;
+            border-radius: 1px;
+        }
+
+        .spray-effect {
+            position: absolute;
+            height: 6px;
+            width: 0px;
+            opacity: 0;
+            transition: width 0.1s linear, opacity 0.1s linear;
+            pointer-events: none;
+            z-index: 1;
+            filter: blur(1px);
+            bottom: 6px;
+        }
+
+        .box-left {
+            align-items: flex-start;
+        }
+
+        .box-left .nozzle-label {
+            left: 0;
+        }
+
+        .box-left .spray-effect {
+            left: 83px;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .box-right {
+            align-items: flex-end;
+        }
+
+        .box-right .nozzle-label {
+            right: 0;
+        }
+
+        .box-right .nozzle-unit {
+            flex-direction: row-reverse;
+        }
+
+        .box-right .spray-effect {
+            right: 83px;
+            border-radius: 4px 0 0 4px;
+        }
+
+        .active-injection .nozzle-body {
+            background: linear-gradient(#999, #444);
+            border-color: #fff;
+        }
+
+        .active-injection .nozzle-tip {
+            background: #eee;
+            border-color: #fff;
+        }
+
+        .active-injection .spray-effect {
+            width: 280px;
+            opacity: 1;
+        }
+
+        #vis-cmf.active-injection .nozzle-label,
+        #vis-solenoid.active-injection .nozzle-label,
+        #vis-mav-o2.active-injection .nozzle-label {
+            color: var(--accent-green);
+            text-shadow: 0 0 5px var(--accent-green);
+        }
+
+        #vis-mav-dil.active-injection .nozzle-label {
+            color: var(--accent-dil);
+            text-shadow: 0 0 5px var(--accent-dil);
+        }
+
+        .spray-o2 {
+            background: linear-gradient(90deg, var(--accent-green) 0%, transparent 100%);
+        }
+
+        .spray-o2-rev {
+            background: linear-gradient(-90deg, var(--accent-green) 0%, transparent 100%);
+        }
+
+        .spray-dil {
+            background: linear-gradient(-90deg, var(--accent-dil) 0%, transparent 100%);
+        }
+
+        .spray-cmf {
+            background: linear-gradient(90deg, var(--accent-green) 0%, transparent 100%);
+        }
+
+        /* --- Mobile Responsive (iPhone/Vertical) --- */
+        @media screen and (max-width: 768px) {
+            .header-title-sub {
+                font-size: 1.1em;
+            }
+
+            .header-right {
+                font-size: 0.65em;
+            }
+
+            /* HUD: Side-by-Side Layout */
+            .diver-hud-section {
+                flex-direction: row;
+                /* 横向排列 */
+                flex-wrap: wrap;
+                /* 允许折行 */
+                justify-content: flex-start;
+                /* 靠左对齐 */
+                align-items: flex-start;
+                padding: 5px;
+                gap: 2%;
+                /* 中间留缝隙 */
+                background: #000;
+                height: auto;
+            }
+
+            /* Main Dive Computer (Left) */
+            .hud-screen {
+                transform: none !important;
+                box-shadow: none;
+                border: 1px solid #333;
+                margin: 0;
+                height: auto;
+                min-height: 110px;
+            }
+
+            .hud-left {
+                width: 55% !important;
+                /* 缩小宽度，给右侧留空间 */
+                flex: none;
+                padding: 5px;
+                /* 减少内边距 */
+            }
+
+            /* 调整潜脑内部字体，防止挤压 */
+            .hud-left .dc-val {
+                font-size: 1.3em;
+            }
+
+            .hud-left .dc-label {
+                font-size: 0.5em;
+            }
+
+            /* Status Box (Right) */
+            .hud-right {
+                width: 43% !important;
+                /* 增加宽度 */
+                flex: none;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                font-size: 0.7em;
+            }
+
+            /* Diver Animation: Fixed broken layout, moved BELOW */
+            .diver-visual-wrapper {
+                width: 100px;
+                /* 固定宽度，防止五官散架 */
+                margin: 5px auto 0 auto;
+                /* 居中 */
+                order: 3;
+                /* 强制排在最后 */
+                transform: scale(0.6);
+                /* 适当缩小 */
+                display: block;
+            }
+
+            .chart-body {
+                height: 150px;
+            }
+
+            /* Main Layout */
+            .main-controls {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .middle-column {
+                display: contents;
+            }
+
+            /* ORDERING */
+            .main-controls>.panel:last-child {
+                order: 1;
+                margin-top: 5px;
+            }
+
+            /* MAV */
+            .injection-matrix-container {
+                order: 2;
+                margin-top: 0;
+            }
+
+            /* Animation */
+            .vertical-panel {
+                order: 3;
+            }
+
+            /* Sliders */
+            .split-row {
+                order: 4;
+                grid-template-columns: 1fr;
+            }
+
+            .middle-column>.panel:last-of-type {
+                order: 5;
+            }
+
+            /* O2 Settings */
+
+            /* --- SLIDER LAYOUT: Grid for Titles + Sliders --- */
+            .vertical-panel {
+                display: grid;
+                grid-template-columns: 1fr;
+                /* Single column */
+                grid-template-rows: auto auto auto auto;
+                /* Title, Group, Title, Group */
+                gap: 5px;
+                height: auto;
+                width: 100%;
+                border-color: #444;
+                padding: 10px;
+                background: #181818;
+            }
+
+            /* Hide separator */
+            .vertical-panel>div[style*="height:1px"] {
+                display: none;
+            }
+
+            /* 1. Target SP Title */
+            .vertical-panel>.panel-title:nth-child(1) {
+                grid-row: 1;
+                grid-column: 1;
+                width: 100%;
+                text-align: left;
+                border: none;
+                margin: 0;
+                border-bottom: 2px solid var(--accent-blue) !important;
+                font-size: 0.7em;
+                padding-left: 5px;
+            }
+
+            /* 2. Target SP Slider Group */
+            .vertical-panel>.vert-slider-group:nth-child(2) {
+                grid-row: 2;
+                grid-column: 1;
+            }
+
+            /* 3. Depth Title */
+            .vertical-panel>.panel-title:nth-child(4) {
+                grid-row: 3;
+                grid-column: 1;
+                width: 100%;
+                text-align: left;
+                border: none;
+                margin: 0;
+                margin-top: 10px;
+                border-bottom: 2px solid var(--accent-depth) !important;
+                font-size: 0.7em;
+                padding-left: 5px;
+            }
+
+            /* 4. Depth Slider Group */
+            .vertical-panel>.vert-slider-group:nth-child(5) {
+                grid-row: 4;
+                grid-column: 1;
+            }
+
+            /* --- Horizontal Slider Styling (Custom Appearance) --- */
+            .vert-slider-group {
+                width: 100%;
+                height: auto;
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+                padding: 10px;
+                background: rgba(255, 255, 255, 0.03);
+                /* Card background */
+                border-radius: 6px;
+                margin-bottom: 5px;
+                padding-right: 15px;
+                /* Prevent text clipping */
+            }
+
+            /* FORCE OVERRIDE vertical orient by recreating the slider */
+            input[type=range][orient=vertical] {
+                -webkit-appearance: none !important;
+                appearance: none !important;
+                writing-mode: horizontal-tb !important;
+                width: 100% !important;
+                height: 12px !important;
+                background: #333 !important;
+                border-radius: 6px;
+                margin: 0 10px !important;
+                flex: 1;
+                order: 1;
+                transform: none !important;
+                /* Remove inversion */
+            }
+
+            /* Custom Thumb for Mobile */
+            input[type=range][orient=vertical]::-webkit-slider-thumb {
+                -webkit-appearance: none !important;
+                appearance: none !important;
+                width: 24px;
+                height: 24px;
+                border-radius: 50%;
+                background: #ccc;
+                cursor: pointer;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+            }
+
+            /* Values */
+            .vert-val {
+                font-size: 1.2em;
+                font-weight: bold;
+                min-width: 50px;
+                text-align: right;
+                margin: 0;
+                order: 2;
+            }
+
+            /* MAV Buttons */
+            .mav-container {
+                flex-direction: row;
+                padding: 15px 0;
+                gap: 40px;
+            }
+
+            .mav-btn-round {
+                width: 75px;
+                height: 75px;
+                font-size: 1.1em;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header-container">
+        <div class="header-left" style="flex-direction:row; align-items:center; gap:12px;">
+            <img src="PowergxIcon.png" alt="POWERGX" style="height:50px;">
+            <div style="display:flex; flex-direction:column;">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <div class="header-title-main">POWERGX CCR EDUCATION TOOL</div>
+                    <button id="btn-install"
+                        style="background:transparent; color:#00BFFF; border:1px solid #00BFFF; border-radius:3px; cursor:pointer; font-size:0.7em; font-weight:500; letter-spacing:1px; text-transform:uppercase; padding:2px 8px; opacity:0.7; transition:opacity 0.2s;"
+                        onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">Install</button>
+                </div>
+                <div class="header-title-sub">CCR PPO2 SIMULATOR v12.1</div>
+            </div>
+        </div>
+        <div class="header-right">
+            <div>POWERGX INC. MYRON YU（Aka.雪夜叉）</div>
+            <div class="audio-ctrl">
+                <label>Audio</label>
+                <input type="checkbox" id="audio-toggle" onchange="audioManager.toggle(this.checked)">
+                <input type="range" id="audio-volume" min="0" max="1" step="0.01" value="0.8"
+                    oninput="audioManager.setVolume(this.value)">
+                <label style="margin-left:8px">DPV</label>
+                <input type="checkbox" id="dpv-toggle" onchange="audioManager.setDPV(this.checked)">
+                <label style="margin-left:8px">Breath</label>
+                <input type="checkbox" id="breath-toggle" onchange="audioManager.setBreath(this.checked)">
+            </div>
+        </div>
+    </div>
+
+    <div class="stage-container">
+        <div class="diver-hud-section">
+            <div class="hud-screen hud-left">
+                <div class="dc-row">
+                    <div class="dc-item">
+                        <div class="dc-label" id="label-depth">DEPTH</div>
+                        <div id="disp-depth" class="dc-val">10m</div>
+                    </div>
+                    <div class="dc-item dc-item-center">
+                        <div class="dc-label">LOOP PPO2</div>
+                        <div id="disp-po2" class="dc-val">1.22</div>
+                    </div>
+                    <div class="dc-item dc-item-right" id="hud-sp-container">
+                        <div class="dc-label">SETPOINT</div>
+                        <div id="disp-setpoint" class="dc-val">1.20</div>
+                    </div>
+                </div>
+
+                <div class="dc-row">
+                    <div class="dc-item dc-item-center cell-box-p">
+                        <div class="dc-label">C1</div>
+                        <div id="cell-1" class="dc-val dc-val-mid">1.23</div>
+                    </div>
+                    <div class="dc-item dc-item-center cell-box-p">
+                        <div class="dc-label">C2</div>
+                        <div id="cell-2" class="dc-val dc-val-mid">1.20</div>
+                    </div>
+                    <div class="dc-item dc-item-center cell-box-p">
+                        <div class="dc-label">C3</div>
+                        <div id="cell-3" class="dc-val dc-val-mid">1.23</div>
+                    </div>
+                </div>
+
+                <div class="dc-row">
+                    <div class="dc-item">
+                        <div class="dc-label">MODE</div>
+                        <div class="dc-val dc-val-mid">CC</div>
+                    </div>
+                    <div class="dc-item dc-item-center">
+                        <div class="dc-label">O2/HE</div>
+                        <div id="disp-o2-he" class="dc-val dc-val-mid">21/35</div>
+                    </div>
+                    <div class="dc-item dc-item-right">
+                        <div class="dc-label">END</div>
+                        <div id="disp-end" class="dc-val dc-val-mid">3m</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="diver-visual" class="diver-visual-wrapper">
+                <div class="head-shape"></div>
+                <div class="mask-frame">
+                    <div class="mask-lens"></div>
+                </div>
+                <div class="eye-group">
+                    <div class="eye">
+                        <div class="pupil"></div>
+                    </div>
+                    <div class="eye">
+                        <div class="pupil"></div>
+                    </div>
+                </div>
+                <div class="dsv-block"></div>
+            </div>
+
+            <div class="hud-screen hud-right" id="hud-alert-panel">
+                <div id="alert-title" class="alert-title">STATUS: OK</div>
+                <ul id="alert-list" class="alert-list">
+                    <li>Life Support Normal</li>
+                </ul>
+            </div>
+        </div>
+        <div class="chart-body"><canvas id="chartCanvas"></canvas></div>
+    </div>
+
+    <div class="main-controls">
+        <div class="vertical-panel" style="border-color: #554400;">
+            <div class="panel-title"
+                style="color:var(--accent-blue); border-color:#004455; text-align:center; width:100%;">TARGET SP</div>
+            <div class="vert-slider-group">
+                <div class="vert-val" id="val-sp-display" style="color:var(--accent-blue)">1.2</div>
+                <input type="range" orient="vertical" min="0.7" max="1.6" step="0.1" value="1.2"
+                    oninput="params.visualSP=parseFloat(this.value); updateSlowUI();">
+            </div>
+            <div style="width:100%; height:1px; background:#333; margin:5px 0;"></div>
+            <div class="panel-title"
+                style="text-align:center; width:100%; color:var(--accent-depth); border-color:#554400;">DEPTH</div>
+            <div class="vert-slider-group">
+                <div class="vert-val" id="val-depth-display" style="color:var(--accent-depth)">10</div>
+                <input type="range" class="inverted-slider" orient="vertical" min="0" max="150" step="1" value="10"
+                    oninput="setDepth(this.value)" style="accent-color:var(--accent-depth)">
+            </div>
+        </div>
+
+        <div class="middle-column">
+            <div class="injection-matrix-container">
+                <div class="nozzle-box box-left" id="vis-cmf">
+                    <div class="nozzle-label">CMF/NEEDLE</div>
+                    <div class="nozzle-unit">
+                        <div class="nozzle-body"></div>
+                        <div class="nozzle-tip"></div>
+                    </div>
+                    <div class="spray-effect spray-cmf"></div>
+                </div>
+                <div class="nozzle-box box-right" id="vis-mav-o2">
+                    <div class="nozzle-label">MAV O2</div>
+                    <div class="nozzle-unit">
+                        <div class="nozzle-body"></div>
+                        <div class="nozzle-tip"></div>
+                    </div>
+                    <div class="spray-effect spray-o2-rev"></div>
+                </div>
+                <div class="nozzle-box box-left" id="vis-solenoid">
+                    <div class="nozzle-label">Solenoid</div>
+                    <div class="nozzle-unit">
+                        <div class="nozzle-body"></div>
+                        <div class="nozzle-tip"></div>
+                    </div>
+                    <div class="spray-effect spray-o2"></div>
+                </div>
+                <div class="nozzle-box box-right" id="vis-mav-dil">
+                    <div class="nozzle-label">MAV DIL</div>
+                    <div class="nozzle-unit">
+                        <div class="nozzle-body"></div>
+                        <div class="nozzle-tip"></div>
+                    </div>
+                    <div class="spray-effect spray-dil"></div>
+                </div>
+            </div>
+
+            <div class="split-row">
+                <div class="panel">
+                    <div class="panel-title" style="color:var(--accent-dil); border-color:#112244;">DILUENT GAS</div>
+                    <div class="status-bar" id="disp-mod">MOD (1.4): ~ 56 m</div>
+                    <div class="btn-row">
+                        <button class="btn btn-dil" onclick="setDiluent('Air', 0.21, 0.0)">Air</button>
+                        <button class="btn btn-dil active-dil"
+                            onclick="setDiluent('Tx 21/35', 0.21, 0.35)">21/35</button>
+                        <button class="btn btn-dil" onclick="setDiluent('Tx 18/45', 0.18, 0.45)">18/45</button>
+                        <button class="btn btn-dil" onclick="setDiluent('Tx 15/55', 0.15, 0.55)">15/55</button>
+                        <button class="btn btn-dil" onclick="setDiluent('Tx 10/70', 0.10, 0.70)">10/70</button>
+                    </div>
+                </div>
+                <div class="panel">
+                    <div class="panel-title" style="color:var(--accent-orange); border-color:#553300;">METABOLISM</div>
+                    <div class="status-bar" id="disp-sac">SAC: ~20 L/min | O2: 1.0 L/min</div>
+                    <div class="btn-row">
+                        <button class="btn btn-vo2" data-val="0.7" onclick="setVO2(0.7)">Rest</button>
+                        <button class="btn btn-vo2 active-vo2" data-val="1.0" onclick="setVO2(1.0)">Norm</button>
+                        <button class="btn btn-vo2" data-val="1.5" onclick="setVO2(1.5)">Work</button>
+                        <button class="btn btn-vo2" data-val="2.5" onclick="setVO2(2.5)">Stress</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel" style="flex:1;">
+                <div class="panel-title" style="color:var(--accent-green); border-color:#004411;">OXYGEN INJECTION
+                    SYSTEM</div>
+                <div class="btn-row">
+                    <button class="btn mode-btn active" onclick="setMode('manual')" id="btn-manual">Manual</button>
+                    <button class="btn mode-btn" onclick="setMode('cmf')" id="btn-cmf">CMF</button>
+                    <button class="btn mode-btn" onclick="setMode('needle')" id="btn-needle">Needle</button>
+                    <button class="btn mode-btn" onclick="setMode('solenoid')" id="btn-solenoid">eCCR</button>
+                    <button class="btn mode-btn" onclick="setMode('hybrid')" id="btn-hybrid">Hybrid</button>
+                </div>
+
+                <div id="dynamic-controls" style="margin-top:8px; background:#111; padding:6px; border-radius:4px;">
+                    <div id="ctrl-cmf" style="margin-bottom:5px; display: flex; align-items: center; gap: 8px;">
+                        <span class="row-label-text" id="label-flow-rate">FLOW RATE (L/min)</span>
+                        <div class="btn-row" style="margin-bottom:0; flex: 1;">
+                            <button class="btn btn-cmf" data-val="0.6" onclick="setCMF(0.6)">0.6</button>
+                            <button class="btn btn-cmf active-cmf" data-val="0.8" onclick="setCMF(0.8)">0.8</button>
+                            <button class="btn btn-cmf" data-val="1.0" onclick="setCMF(1.0)">1.0</button>
+                        </div>
+                    </div>
+                    <div id="ctrl-needle" style="margin-bottom:5px;">
+                        <div class="slider-row"><span class="row-label-text" id="label-needle-flow">FLOW
+                                RATE</span><input type="range" id="slider-needle" min="0.0" max="2.0" step="0.1"
+                                value="0.8"
+                                oninput="params.needleBase=parseFloat(this.value); updateUIVal('disp-needle-val', this.value + ' L/m');"><span
+                                id="disp-needle-val"
+                                style="width:40px; text-align:right; font-family:monospace; color:#aaa;">0.8 L/m</span>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:5px; font-size:0.75em; margin-top:3px;">
+                            <input type="checkbox" id="chk-uncomp" onchange="params.needleUncompensated = this.checked">
+                            <label for="chk-uncomp" style="color:#666;">Uncompensated (Flow drops at depth)</label>
+                        </div>
+                    </div>
+                    <div id="ctrl-solenoid" style="display: flex; align-items: center; gap: 8px;">
+                        <span class="row-label-text" id="label-solenoid-sp">SOLENOID SP</span>
+                        <div class="btn-row" style="margin-bottom:0; flex: 1;">
+                            <button class="btn btn-sp" data-val="0.7" onclick="setComputerSP(0.7)">0.7</button>
+                            <button class="btn btn-sp" data-val="1.0" onclick="setComputerSP(1.0)">1.0</button>
+                            <button class="btn btn-sp active-sp" data-val="1.2"
+                                onclick="setComputerSP(1.2)">1.2</button>
+                            <button class="btn btn-sp" data-val="1.3" onclick="setComputerSP(1.3)">1.3</button>
+                            <button class="btn btn-sp" data-val="1.4" onclick="setComputerSP(1.4)">1.4</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">MAV</div>
+            <div class="mav-container">
+                <button class="mav-btn-round mav-o2" id="btn-mav-o2" onmousedown="startInject('o2')"
+                    onmouseup="stopInject()" ontouchstart="event.preventDefault(); startInject('o2')"
+                    ontouchend="stopInject()">O2</button>
+                <button class="mav-btn-round mav-dil" id="btn-mav-dil" onmousedown="startInject('dil')"
+                    onmouseup="stopInject()" ontouchstart="event.preventDefault(); startInject('dil')"
+                    ontouchend="stopInject()">DIL</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-signature">© POWERGX FLUIDICS LAB 2026</div>
+
+    <script>
+        // --- 音频管理器 ---
+        const audioManager = {
+            ctx: null, masterGain: null, oceanGain: null, hissGain: null, dpvGain: null, noiseBuffer: null,
+            init() {
+                if (this.ctx) return;
+                this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                this.masterGain = this.ctx.createGain(); this.masterGain.gain.value = 0.8;
+                this.masterGain.connect(this.ctx.destination);
+                const bufferSize = this.ctx.sampleRate * 2;
+                this.noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+                const data = this.noiseBuffer.getChannelData(0);
+                let b0, b1, b2, b3, b4, b5, b6; b0 = b1 = b2 = b3 = b4 = b5 = b6 = 0.0;
+                for (let i = 0; i < bufferSize; i++) {
+                    const white = Math.random() * 2 - 1;
+                    b0 = 0.99886 * b0 + white * 0.0555179; b1 = 0.99332 * b1 + white * 0.0750759; b2 = 0.96900 * b2 + white * 0.1538520;
+                    b3 = 0.86650 * b3 + white * 0.3104856; b4 = 0.55000 * b4 + white * 0.5329522; b5 = -0.7616 * b5 - white * 0.0168980;
+                    data[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362; data[i] *= 0.11; b6 = white * 0.115926;
+                }
+                this.createOcean(); this.createHiss(); this.createDPV();
+            },
+            toggle(on) { if (on) this.init(); if (this.ctx) this.ctx.resume(); this.masterGain.gain.setTargetAtTime(on ? document.getElementById('audio-volume').value : 0, this.ctx.currentTime, 0.1); },
+            setVolume(v) { if (this.masterGain) this.masterGain.gain.setTargetAtTime(v, this.ctx.currentTime, 0.1); },
+            createOcean() {
+                const noise = this.ctx.createBufferSource(); noise.buffer = this.noiseBuffer; noise.loop = true;
+                this.oceanGain = this.ctx.createGain(); this.oceanGain.gain.value = 0.2;
+                const filter = this.ctx.createBiquadFilter(); filter.type = 'lowpass'; filter.frequency.value = 350;
+                noise.connect(filter); filter.connect(this.oceanGain); this.oceanGain.connect(this.masterGain); noise.start();
+            },
+            playClick() {
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator(), g = this.ctx.createGain();
+                osc.type = 'square'; osc.frequency.setValueAtTime(1800, now); osc.frequency.exponentialRampToValueAtTime(100, now + 0.01);
+                g.gain.setValueAtTime(0.3, now); g.gain.exponentialRampToValueAtTime(0.01, now + 0.01);
+                osc.connect(g); g.connect(this.masterGain); osc.start(now); osc.stop(now + 0.015);
+            },
+            createHiss() {
+                const noise = this.ctx.createBufferSource(); noise.buffer = this.noiseBuffer; noise.loop = true;
+                this.hissGain = this.ctx.createGain(); this.hissGain.gain.value = 0;
+                const filter = this.ctx.createBiquadFilter(); filter.type = 'bandpass'; filter.frequency.value = 1000; filter.Q.value = 1.0;
+                noise.connect(filter); filter.connect(this.hissGain); this.hissGain.connect(this.masterGain); noise.start();
+            },
+            setHiss(on) { if (this.hissGain) this.hissGain.gain.setTargetAtTime(on ? 0.2 : 0, this.ctx.currentTime, 0.1); },
+
+            // --- Seacraft Magnetic Drive Sound Simulation ---
+            createDPV() {
+                this.dpvGain = this.ctx.createGain();
+                this.dpvGain.gain.value = 0;
+
+                // 1. 磁驱动主频 (Magnetic Motor Whine) - 400Hz 三角波
+                this.dpvOsc = this.ctx.createOscillator();
+                this.dpvOsc.type = 'triangle';
+                this.dpvOsc.frequency.value = 400;
+
+                const motorVol = this.ctx.createGain();
+                motorVol.gain.value = 0.05;
+
+                const motorFilter = this.ctx.createBiquadFilter();
+                motorFilter.type = 'lowpass';
+                motorFilter.frequency.value = 1200;
+
+                this.dpvOsc.connect(motorFilter);
+                motorFilter.connect(motorVol);
+                motorVol.connect(this.dpvGain);
+
+                // 2. 变频器高频泛音 (Inverter Harmonics) - 2500Hz 正弦波
+                const inverterOsc = this.ctx.createOscillator();
+                inverterOsc.type = 'sine';
+                inverterOsc.frequency.value = 2500;
+                const inverterVol = this.ctx.createGain();
+                inverterVol.gain.value = 0.01;
+                inverterOsc.connect(inverterVol);
+                inverterVol.connect(this.dpvGain);
+
+                // 3. 螺旋桨高速切水声 (Prop Wash) - 800Hz 带通噪音
+                const waterNoise = this.ctx.createBufferSource();
+                waterNoise.buffer = this.noiseBuffer;
+                waterNoise.loop = true;
+
+                const waterFilter = this.ctx.createBiquadFilter();
+                waterFilter.type = 'bandpass';
+                waterFilter.frequency.value = 800;
+                waterFilter.Q.value = 0.5;
+
+                const waterVol = this.ctx.createGain();
+                waterVol.gain.value = 0.15;
+
+                waterNoise.connect(waterFilter);
+                waterFilter.connect(waterVol);
+                waterVol.connect(this.dpvGain);
+
+                this.dpvGain.connect(this.masterGain);
+
+                this.dpvOsc.start();
+                inverterOsc.start();
+                waterNoise.start();
+
+                // 保存引用以便在启动时做变调处理
+                this.dpvMotorRef = this.dpvOsc;
+            },
+
+            setDPV(on) {
+                if (!this.dpvGain) return;
+                const now = this.ctx.currentTime;
+
+                if (on) {
+                    // 启动：音量淡入 + 扭矩爬升变调 (200Hz -> 400Hz)
+                    this.dpvGain.gain.cancelScheduledValues(now);
+                    this.dpvGain.gain.setValueAtTime(0, now);
+                    this.dpvGain.gain.linearRampToValueAtTime(0.3, now + 0.2);
+
+                    if (this.dpvMotorRef) {
+                        this.dpvMotorRef.frequency.cancelScheduledValues(now);
+                        this.dpvMotorRef.frequency.setValueAtTime(200, now);
+                        this.dpvMotorRef.frequency.exponentialRampToValueAtTime(400, now + 0.3);
+                    }
+                } else {
+                    // 停止：快速淡出 + 减速变调
+                    this.dpvGain.gain.cancelScheduledValues(now);
+                    this.dpvGain.gain.setTargetAtTime(0, now, 0.1);
+
+                    if (this.dpvMotorRef) {
+                        this.dpvMotorRef.frequency.cancelScheduledValues(now);
+                        this.dpvMotorRef.frequency.setTargetAtTime(100, now, 0.2);
+                    }
+                }
+            },
+
+            // --- Advanced Breathing Simulation ---
+            breathGain: null, breathFilter: null, breathOsc: null,
+            breathTimer: null, isBreathing: false, breathState: 'inhale',
+
+            createBreath() {
+                if (this.breathGain) return;
+
+                // Main Gain Stage
+                this.breathGain = this.ctx.createGain();
+                this.breathGain.gain.value = 0;
+                this.breathGain.connect(this.masterGain);
+
+                // Noise Source (White Noise)
+                const noise = this.ctx.createBufferSource();
+                noise.buffer = this.noiseBuffer;
+                noise.loop = true;
+
+                // Filter Chain for Resonance
+                // 1. Base Filter (Dynamic)
+                this.breathFilter = this.ctx.createBiquadFilter();
+
+                // 2. Formant Filter (fixed resonance) - mimicking plastic shell/regulator body
+                const formant = this.ctx.createBiquadFilter();
+                formant.type = 'peaking';
+                formant.frequency.value = 1200;
+                formant.Q.value = 0.5; // Reduced Q
+                formant.gain.value = 2; // Reduced Gain
+
+                // 3. Low Cut (remove mud)
+                const lowCut = this.ctx.createBiquadFilter();
+                lowCut.type = 'highpass';
+                lowCut.frequency.value = 100;
+
+                noise.connect(lowCut);
+                lowCut.connect(this.breathFilter);
+                this.breathFilter.connect(formant);
+                formant.connect(this.breathGain);
+
+                noise.start();
+            },
+
+            playValveClick() {
+                // Simulates the "Crack" of the demand valve opening
+                const t = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const g = this.ctx.createGain();
+
+                osc.frequency.setValueAtTime(800, t);
+                osc.frequency.exponentialRampToValueAtTime(100, t + 0.05);
+
+                g.gain.setValueAtTime(0.03, t); // Reduced from 0.1
+                g.gain.exponentialRampToValueAtTime(0.01, t + 0.05);
+
+                osc.connect(g);
+                g.connect(this.masterGain);
+
+                osc.start(t);
+                osc.stop(t + 0.06);
+            },
+
+            setBreath(on) {
+                if (on) {
+                    this.createBreath();
+                    this.isBreathing = true;
+                    this.breathState = 'inhale';
+                    this.breathLoop();
+                } else {
+                    this.isBreathing = false;
+                    if (this.breathTimer) clearTimeout(this.breathTimer);
+                    if (this.breathGain) this.breathGain.gain.setTargetAtTime(0, this.ctx.currentTime, 0.2);
+                }
+            },
+
+            breathLoop() {
+                if (!this.isBreathing || !this.ctx) return;
+                const now = this.ctx.currentTime;
+
+                if (this.breathState === 'inhale') {
+                    // --- INHALE PHRASE ---
+                    // 1. Mechanical Valve Click
+                    this.playValveClick();
+
+                    // 2. Air Rush (Darth Vader style hollow sweep)
+                    // Reset filters for inhale
+                    this.breathFilter.type = 'lowpass';
+                    this.breathFilter.Q.value = 0.5;
+                    this.breathFilter.frequency.cancelScheduledValues(now);
+                    this.breathFilter.frequency.setValueAtTime(200, now);
+                    this.breathFilter.frequency.exponentialRampToValueAtTime(1500, now + 1.2);
+
+                    // Volume Envelope
+                    this.breathGain.gain.cancelScheduledValues(now);
+                    this.breathGain.gain.setValueAtTime(0, now);
+                    this.breathGain.gain.linearRampToValueAtTime(0.2, now + 0.1);
+                    this.breathGain.gain.linearRampToValueAtTime(0.15, now + 1.2);
+                    this.breathGain.gain.linearRampToValueAtTime(0, now + 1.6);
+
+                    this.breathState = 'exhale';
+                    this.breathTimer = setTimeout(() => this.breathLoop(), 2000);
+
+                } else {
+                    // --- EXHALE PHRASE ---
+                    // Bubbles! Needs chopped LFO modulation for texture.
+
+                    // Filter: Lowpass, unmuffled but deep bumps
+                    this.breathFilter.type = 'lowpass';
+                    this.breathFilter.Q.value = 0.5;
+                    this.breathFilter.frequency.cancelScheduledValues(now);
+                    this.breathFilter.frequency.setValueAtTime(600, now); // Fixed muddy frequency
+
+                    // Complex Volume Envelope (Simulate bubble bursts)
+                    // We can't easily do LFO AM without more nodes, so we'll simulate "glugging" 
+                    // by modulating gain rapidly in the envelope.
+                    this.breathGain.gain.cancelScheduledValues(now);
+                    this.breathGain.gain.setValueAtTime(0, now);
+                    this.breathGain.gain.linearRampToValueAtTime(0.5, now + 0.1);
+
+                    // Simulated LFO Ripple
+                    const duration = 2.0;
+                    const steps = 10;
+                    for (let i = 0; i < steps; i++) {
+                        let t = now + 0.1 + (i / steps) * duration;
+                        let val = 0.15 + Math.random() * 0.2; // Random volume jitter
+                        this.breathGain.gain.linearRampToValueAtTime(val, t);
+                    }
+                    this.breathGain.gain.linearRampToValueAtTime(0, now + 2.5);
+
+                    this.breathState = 'inhale';
+                    this.breathTimer = setTimeout(() => this.breathLoop(), 3000); // Longer exhale pause
+                }
+            }
+        };
+
+        // --- 核心逻辑 ---
+        const params = { po2: 1.0, displayPo2: 1.0, visualSP: 1.2, computerSP: 1.2, depthM: 10, depthATA: 2.0, loopVolume: 6.0, metabolism: 1.0, mode: 'manual', cmfRate: 0.8, needleBase: 0.8, needleUncompensated: false, solenoidRate: 10.0, mavRate: 30.0, diluentFO2: 0.21, diluentFHe: 0.35, cells: [1.0, 1.0, 1.0], currentPulseLimit: 0 };
+        let solenoidTimer = 0, solenoidShouldFire = false, solenoidActive = false, manualO2 = false, manualDil = false, lastTime = Date.now(), lastSlowUI = 0, lastSolenoidState = false;
+        const history = []; const maxHistory = 400;
+
+        function updateUIVal(id, val) { const el = document.getElementById(id); if (el) el.innerText = val; }
+
+        function setDiluent(name, fo2, fhe) {
+            params.diluentFO2 = fo2; params.diluentFHe = fhe;
+            document.querySelectorAll('.btn-dil').forEach(btn => btn.classList.toggle('active-dil', btn.innerText.includes(name.split(' ')[1] || name)));
+            updateUIVal('disp-mod', `MOD (1.4): ~ ${Math.floor((1.4 / fo2 - 1) * 10)} m`);
+            updateUIVal('disp-o2-he', (fo2 * 100).toFixed(0) + '/' + (fhe * 100).toFixed(0)); updateSlowUI();
+        }
+
+        function setDepth(m) {
+            let oldATA = params.depthATA; params.depthM = parseFloat(m); params.depthATA = (params.depthM / 10) + 1;
+            let ratio = params.depthATA / oldATA;
+            params.po2 = Math.min(params.depthATA, params.po2 * ratio); params.displayPo2 = params.po2; updateSlowUI();
+        }
+
+        function setVO2(val) { params.metabolism = val; document.querySelectorAll('.btn-vo2').forEach(btn => btn.classList.toggle('active-vo2', Math.abs(parseFloat(btn.dataset.val) - val) < 0.01)); updateUIVal('disp-sac', `SAC: ~${(val * 20).toFixed(0)} L/min | O2: ${val.toFixed(1)} L/min`); updateSlowUI(); }
+
+        function setMode(mode) {
+            params.mode = mode;
+            document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.id === 'btn-' + mode));
+            document.getElementById('ctrl-cmf').classList.toggle('disabled-area', mode !== 'cmf' && mode !== 'hybrid');
+            document.getElementById('ctrl-needle').classList.toggle('disabled-area', mode !== 'needle');
+            document.getElementById('ctrl-solenoid').classList.toggle('disabled-area', mode !== 'solenoid' && mode !== 'hybrid');
+            document.getElementById('slider-needle').style.accentColor = (mode === 'needle') ? 'var(--accent-green)' : '#666';
+            const isFlowActive = (mode === 'cmf' || mode === 'needle' || mode === 'hybrid');
+            const isSolenoidActive = (mode === 'solenoid' || mode === 'hybrid');
+            document.getElementById('label-flow-rate').style.color = isFlowActive ? 'var(--accent-green)' : '#666';
+            document.getElementById('label-needle-flow').style.color = (mode === 'needle') ? 'var(--accent-green)' : '#666';
+            document.getElementById('disp-needle-val').style.color = (mode === 'needle') ? 'var(--accent-green)' : '#aaa';
+            document.getElementById('label-solenoid-sp').style.color = isSolenoidActive ? 'var(--accent-blue)' : '#666';
+            document.getElementById('hud-sp-container').style.visibility = (mode === 'solenoid' || mode === 'hybrid') ? 'visible' : 'hidden';
+        }
+
+        function startInject(t) { if (t === 'o2') manualO2 = true; else manualDil = true; audioManager.setHiss(true); }
+        function stopInject() { manualO2 = false; manualDil = false; audioManager.setHiss(false); }
+        function setCMF(v) { params.cmfRate = v; document.querySelectorAll('.btn-cmf').forEach(btn => btn.classList.toggle('active-cmf', Math.abs(parseFloat(btn.dataset.val) - v) < 0.01)); }
+        function setComputerSP(v) { params.computerSP = v; document.querySelectorAll('.btn-sp').forEach(btn => btn.classList.toggle('active-sp', Math.abs(parseFloat(btn.dataset.val) - v) < 0.01)); updateSlowUI(); }
+
+        function loop() {
+            const now = Date.now(); let dt = now - lastTime; if (dt > 100) dt = 16; lastTime = now;
+            const dtMin = dt / 60000; params.po2 = Math.min(params.depthATA, Math.max(0, params.po2));
+            if (manualDil) {
+                const decayFactor = 1 - Math.exp(-5 * dtMin * 60);
+                params.po2 = params.po2 * (1 - decayFactor) + (params.diluentFO2 * params.depthATA) * decayFactor; params.displayPo2 = params.po2;
+            } else {
+                let flow_legit = -params.metabolism;
+                if (params.mode === 'cmf' || params.mode === 'hybrid') flow_legit += params.cmfRate;
+                if (params.mode === 'needle') {
+                    let current = params.needleBase;
+                    if (params.needleUncompensated) current *= (Math.max(0, 10.0 - params.depthATA) / 9.0);
+                    flow_legit += current;
+                }
+                if (manualO2) flow_legit += params.mavRate;
+                let flow_sol = 0; solenoidActive = false;
+                if (params.mode === 'solenoid' || params.mode === 'hybrid') {
+                    solenoidTimer += dt;
+                    if (solenoidTimer >= 4000) {
+                        solenoidTimer = 0;
+                        if (params.po2 < params.computerSP - 0.005) {
+                            let msNeeded = ((0.08 * params.loopVolume) / params.depthATA / params.solenoidRate) * 60000;
+                            params.currentPulseLimit = Math.max(100, Math.min(2500, msNeeded));
+                            solenoidShouldFire = true;
+                        } else { solenoidShouldFire = false; }
+                    }
+                    if (solenoidShouldFire && solenoidTimer < params.currentPulseLimit) { solenoidActive = true; flow_sol = params.solenoidRate; }
+                }
+                if (solenoidActive && !lastSolenoidState) audioManager.playClick();
+                lastSolenoidState = solenoidActive;
+                let real_inc_sol = (flow_sol * dtMin * params.depthATA) / params.loopVolume;
+                let real_inc_legit = (flow_legit * dtMin * 1.0) / params.loopVolume;
+                params.po2 += (real_inc_sol + real_inc_legit); params.displayPo2 += real_inc_legit;
+                if (solenoidActive) params.displayPo2 = Math.min(params.computerSP + 0.05, params.displayPo2 + real_inc_sol);
+                if (!solenoidActive && params.po2 > params.displayPo2) params.displayPo2 = params.po2;
+                if (params.po2 < params.displayPo2) params.displayPo2 = params.po2;
+            }
+            document.getElementById('vis-mav-o2').classList.toggle('active-injection', manualO2);
+            document.getElementById('vis-mav-dil').classList.toggle('active-injection', manualDil);
+            document.getElementById('vis-solenoid').classList.toggle('active-injection', solenoidActive);
+            const visCmf = document.getElementById('vis-cmf'), sprayCmf = visCmf.querySelector('.spray-effect');
+            if (params.mode === 'cmf' || params.mode === 'hybrid' || params.mode === 'needle') {
+                visCmf.classList.add('active-injection');
+                let cur = (params.mode === 'needle') ? params.needleBase : params.cmfRate;
+                sprayCmf.style.width = Math.min(280, cur * 140) + 'px';
+            } else { visCmf.classList.remove('active-injection'); sprayCmf.style.width = '0px'; }
+            document.getElementById('btn-mav-o2').classList.toggle('active-key', manualO2);
+            document.getElementById('btn-mav-dil').classList.toggle('active-key', manualDil);
+            if (now - lastSlowUI > 800) { updateSlowUI(); lastSlowUI = now; }
+            draw();
+        }
+
+        /**
+         * 辅助函数：应用 DC (Dive Computer) 告警颜色
+         */
+        function applyDcColor(el, val) {
+            el.classList.remove('val-alarm-red', 'val-alarm-purple');
+            if (val > 1.60 || (val < 0.40 && val > 0.01)) { // 低于0.4或高于1.6变红
+                el.classList.add('val-alarm-red');
+            } else if (val <= 0.16) { // 极度缺氧变紫
+                el.classList.add('val-alarm-purple');
+            }
+        }
+
+        function updateDiverStatus(po2) {
+            const visual = document.getElementById('diver-visual'), panel = document.getElementById('hud-alert-panel');
+            const title = document.getElementById('alert-title'), list = document.getElementById('alert-list'), endDisp = document.getElementById('disp-end');
+            let end = Math.max(0, (params.depthM + 10) * (1 - params.diluentFHe) - 10);
+            endDisp.innerText = end.toFixed(0) + "m";
+            visual.className = 'diver-visual-wrapper';
+            panel.className = 'hud-screen hud-right status-ok'; title.innerText = "STATUS: OK"; title.style.color = "var(--accent-green)";
+            list.innerHTML = "<li>Life Support Normal</li>";
+
+            // 1. PPO2 告警颜色：不仅修改状态描述，还修改 UI 数值
+            const ppo2El = document.getElementById('disp-po2');
+            applyDcColor(ppo2El, po2);
+            applyDcColor(document.getElementById('cell-1'), params.cells[0]);
+            applyDcColor(document.getElementById('cell-2'), params.cells[1]);
+            applyDcColor(document.getElementById('cell-3'), params.cells[2]);
+
+            // 2. MOD 告警检查：如果 Diluent PPO2 > 1.40，深度变红
+            const depthEl = document.getElementById('disp-depth');
+            const dilPPO2 = params.diluentFO2 * params.depthATA;
+            depthEl.classList.remove('val-alarm-red');
+            if (dilPPO2 > 1.40) {
+                depthEl.classList.add('val-alarm-red');
+            }
+
+            if (po2 > 1.6) {
+                visual.classList.add('state-hyperoxia'); panel.className = 'hud-screen hud-right status-high'; title.innerText = "CNS TOXICITY"; title.style.color = "var(--danger-high)";
+                list.innerHTML = "<li>Twitching (Face/Lips)</li><li>Visual/Ear Disturbance</li><li>Nausea / Dizziness</li><li style='color:#ff5555; font-weight:bold;'>CONVULSIONS (DEATH)</li>";
+
+                // --- Linkage: Convulsions (> 2.0) = Stop Breathing ---
+                if (po2 > 2.0) {
+                    const breathToggle = document.getElementById('breath-toggle');
+                    if (breathToggle && breathToggle.checked) {
+                        breathToggle.checked = false;
+                        if (window.audioManager) audioManager.setBreath(false);
+                        console.warn("Diver Convulsions: Breathing stopped.");
+                    }
+                }
+            } else if (po2 < 0.16) {
+                visual.classList.add('state-hypoxia'); panel.className = 'hud-screen hud-right status-low'; title.innerText = "HYPOXIA"; title.style.color = "var(--danger-low)";
+                list.innerHTML = "<li>Confusion / Euphoria</li><li>Loss of Coordination</li><li style='color:#e0aaff; font-weight:bold;'>BLACKOUT (DEATH)</li>";
+
+                // --- Linkage: Unconscious = Stop Breathing ---
+                const breathToggle = document.getElementById('breath-toggle');
+                if (breathToggle && breathToggle.checked) {
+                    breathToggle.checked = false;
+                    if (window.audioManager) audioManager.setBreath(false);
+                    // Optional: Visual cue or console log
+                    console.warn("Diver Blackout: Breathing stopped.");
+                }
+            } else if (end > 40) {
+                visual.classList.add('state-narcosis'); panel.className = 'hud-screen hud-right status-narc'; title.innerText = "NARCOSIS"; title.style.color = "var(--danger-narc)";
+                list.innerHTML = "<li>Slowed Reaction</li><li>Impaired Judgment</li><li style='color:#ff88ff'>Stupor / Anesthesia</li>";
+            }
+        }
+
+        function updateSlowUI() {
+            params.cells = params.cells.map(() => Math.max(0, params.displayPo2 + Math.random() * 0.04 - 0.02));
+            const avg = params.cells.reduce((a, b) => a + b) / 3;
+            updateUIVal('disp-po2', avg.toFixed(2));
+            updateUIVal('cell-1', params.cells[0].toFixed(2)); updateUIVal('cell-2', params.cells[1].toFixed(2)); updateUIVal('cell-3', params.cells[2].toFixed(2));
+            updateUIVal('disp-setpoint', params.computerSP.toFixed(2)); updateUIVal('val-sp-display', params.visualSP.toFixed(1));
+            updateUIVal('disp-depth', params.depthM + 'm'); updateUIVal('val-depth-display', params.depthM);
+            updateDiverStatus(avg);
+            history.push(params.displayPo2); if (history.length > maxHistory) history.shift();
+        }
+
+        const ctx = document.getElementById('chartCanvas').getContext('2d');
+        function draw() {
+            const w = ctx.canvas.width = ctx.canvas.clientWidth, h = ctx.canvas.height = ctx.canvas.clientHeight;
+            ctx.fillStyle = '#000'; ctx.fillRect(0, 0, w, h);
+            ctx.strokeStyle = '#222'; ctx.lineWidth = 1; ctx.font = '10px Segoe UI'; ctx.fillStyle = '#eee'; ctx.textAlign = 'right';
+            [1.8, 1.6, 1.4, 1.2, 1.0, 0.8, 0.6, 0.4, 0.2].forEach(v => {
+                let y = h - (v / 2.0) * h; ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); ctx.fillText(v.toFixed(1), w - 5, y + 3);
+            });
+            ctx.fillStyle = 'rgba(255,0,0,0.15)'; ctx.fillRect(0, 0, w, h - (1.6 / 2.0) * h);
+            ctx.fillStyle = 'rgba(150,0,255,0.15)'; ctx.fillRect(0, h - (0.16 / 2.0) * h, w, (0.16 / 2.0) * h);
+            const spY = h - (params.visualSP / 2.0) * h;
+            ctx.strokeStyle = '#00e5ff'; ctx.lineWidth = 1.5; ctx.setLineDash([8, 4]); ctx.beginPath(); ctx.moveTo(0, spY); ctx.lineTo(w, spY); ctx.stroke();
+            ctx.setLineDash([]); ctx.fillStyle = '#00e5ff'; ctx.font = 'bold 11px Segoe UI'; ctx.textAlign = 'left';
+            ctx.fillText(" [ TARGET SP: " + params.visualSP.toFixed(2) + " ]", 10, spY - 6);
+            if (history.length > 1) { ctx.beginPath(); ctx.lineWidth = 2; ctx.strokeStyle = '#00ff41'; history.forEach((v, i) => { let x = (i / maxHistory) * w, y = h - (v / 2.0) * h; if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); }); ctx.stroke(); }
+        }
+
+        function renderLoop() { if (document.visibilityState === 'visible') draw(); requestAnimationFrame(renderLoop); }
+        requestAnimationFrame(renderLoop);
+        // const worker = new Worker(URL.createObjectURL(new Blob([`setInterval(() => postMessage('tick'), 16);`], { type: 'text/javascript' }))); // Removed worker
+        // worker.onmessage = loop; // Removed worker message handler
+        window.onload = function () {
+            // Updated Init logic
+            setDiluent('Air', 0.21, 0.00);
+            setMode('manual');
+            setVO2(1.0);
+            setDepth(10);
+            updateSlowUI();
+            loop();
+            setInterval(loop, 16);
+
+            // Audio Init
+            const volSlider = document.getElementById('audio-volume');
+            if (volSlider) volSlider.value = 0.5;
+
+
+
+            // PWA 安装按钮逻辑
+            let deferredPrompt;
+            const installBtn = document.getElementById('btn-install');
+
+            window.addEventListener('beforeinstallprompt', (e) => {
+                console.log('PWA: beforeinstallprompt 触发');
+                e.preventDefault();
+                deferredPrompt = e;
+                installBtn.innerText = "安装应用";
+                installBtn.style.background = "#00ff00";
+            });
+
+            installBtn.addEventListener('click', () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    deferredPrompt.userChoice.then((choiceResult) => {
+                        if (choiceResult.outcome === 'accepted') {
+                            console.log('用户同意安装');
+                        }
+                        deferredPrompt = null;
+                    });
+                } else {
+                    let msg = "How to save as offline APP\n";
+                    msg += "─────────────────\n\n";
+                    msg += "[Android]\n";
+                    msg += "Chrome (⋮) → Add to Home Screen\n";
+                    msg += "Chrome (⋮) → ホーム画面に追加\n";
+                    msg += "Chrome (⋮) → 添加到主屏幕\n\n";
+                    msg += "[iOS/iPad]\n";
+                    msg += "Safari Share → Add to Home Screen\n";
+                    msg += "Safari 共有 → ホーム画面に追加\n";
+                    msg += "Safari 分享 → 添加到主屏幕";
+                    alert(msg);
+                }
+            });
+
+            window.addEventListener('appinstalled', (evt) => {
+                installBtn.innerText = "已安装";
+                installBtn.style.display = 'none';
+            });
+        };
+        window.addEventListener('keydown', e => { if (e.code === 'ArrowUp' || e.code === 'KeyO') startInject('o2'); if (e.code === 'ArrowDown' || e.code === 'KeyD') startInject('dil'); });
+        window.addEventListener('keyup', e => { if (e.code === 'ArrowUp' || e.code === 'KeyO') stopInject(); if (e.code === 'ArrowDown' || e.code === 'KeyD') stopInject(); });
+    </script>
+</body>
+
+</html>
