@@ -117,8 +117,10 @@
             max-width: 1200px;
             margin-top: 15px;
             padding: 0 5px 10px 5px;
-            color: #444;
-            font-size: 0.75em;
+            color: #666;
+            /* Exact match to header-right signature color */
+            font-size: 0.9em;
+            /* Matched prominence to header signature */
             font-weight: bold;
         }
 
@@ -138,6 +140,14 @@
             overflow: hidden;
             vertical-align: bottom;
             white-space: nowrap;
+            min-width: fit-content;
+        }
+
+        .dpv-order-link .width-setter {
+            visibility: hidden;
+            display: block;
+            height: 0;
+            pointer-events: none;
         }
 
         /* Passionate Red Pulse for DPV Link */
@@ -1631,7 +1641,8 @@
             </div>
         </div>
         <div class="header-right">
-            <a href="javascript:void(0)" class="signature-contact" id="sig-link" onclick="handleSignatureClick(event)">
+            <a href="javascript:void(0)" class="signature-contact" id="sig-link"
+                onclick="handleFooterLinkClick(event, 'sig-link', 'mailto:myron.yu@powergx.co.jp')">
                 <span class="original-text">POWERGX INC. MYRON YU（Aka.雪夜叉）</span>
                 <span class="hover-text">Contact Us</span>
             </a>
@@ -1909,18 +1920,13 @@
     <div class="footer-container">
         <div class="footer-left">
             <a href="javascript:void(0)" class="dpv-order-link" id="dpv-link"
-                onclick="handleFooterLinkClick(event, 'dpv-link', 'mailto:info@powerg.co.jp')">
+                onclick="handleFooterLinkClick(event, 'dpv-link', 'mailto:info@powergx.co.jp')">
                 <span class="original-text">Need Furious Speed</span>
                 <span class="hover-text">Order Triggerfish DPV</span>
+                <span class="width-setter">Order Triggerfish DPV</span>
             </a>
         </div>
         <div class="footer-signature">
-            <a href="javascript:void(0)" class="signature-contact" id="sig-link"
-                onclick="handleFooterLinkClick(event, 'sig-link', 'mailto:myron.yu@powergx.co.jp')">
-                <span class="original-text">POWERGX INC. MYRON YU（Aka.雪夜叉）</span>
-                <span class="hover-text">Contact Us</span>
-            </a>
-            <br>
             © POWERGX FLUIDICS LAB 2026
         </div>
     </div>
