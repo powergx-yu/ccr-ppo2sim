@@ -5,6 +5,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>CCR PPO2 Simulator V12.1</title>
+    <meta name="description"
+        content="A professional simulator for CCR instruction, featuring interactive PPO2 monitoring and dive simulation.">
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="CCR PPO2 Simulator V12.1">
+    <meta property="og:description"
+        content="A professional simulator for CCR instruction, featuring interactive PPO2 monitoring and dive simulation.">
+    <meta property="og:image" content="icon_512.png">
     <!-- PWA Settings -->
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon_512.png">
@@ -1830,7 +1838,7 @@
             },
             setHiss(on) { if (this.hissGain) this.hissGain.gain.setTargetAtTime(on ? 0.2 : 0, this.ctx.currentTime, 0.1); },
 
-            // --- Seacraft Magnetic Drive Sound Simulation ---
+            // --- Magnetic Drive Sound Simulation ---
             createDPV() {
                 this.dpvGain = this.ctx.createGain();
                 this.dpvGain.gain.value = 0;

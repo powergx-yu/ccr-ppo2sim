@@ -2,7 +2,7 @@ const CACHE_NAME = 'ccr-sim-v12.1';
 const ASSETS_TO_CACHE = [
     './index.html',
     './manifest.json',
-    './icon.jpg',
+    './icon.webp',
     './powergxicon.png'
 ];
 
