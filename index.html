@@ -610,7 +610,7 @@
             position: relative;
             z-index: 5;
             margin-top: 5px;
-            animation: breathing-anim 4s infinite ease-in-out;
+            animation: breathing-anim var(--breath-duration, 4s) infinite ease-in-out;
         }
 
         .head-shape {
@@ -2060,7 +2060,8 @@
                     this.breathGain.gain.linearRampToValueAtTime(0, now + 1.6);
 
                     this.breathState = 'exhale';
-                    this.breathTimer = setTimeout(() => this.breathLoop(), 2000);
+                    const inhalePause = 2000 / params.metabolism;
+                    this.breathTimer = setTimeout(() => this.breathLoop(), inhalePause);
 
                 } else {
                     // --- EXHALE PHRASE ---
@@ -2090,10 +2091,17 @@
                     this.breathGain.gain.linearRampToValueAtTime(0, now + 2.5);
 
                     this.breathState = 'inhale';
-                    this.breathTimer = setTimeout(() => this.breathLoop(), 3000); // Longer exhale pause
+                    const exhalePause = 3000 / params.metabolism;
+                    this.breathTimer = setTimeout(() => this.breathLoop(), exhalePause); // Dynamic exhale pause
                 }
             }
         };
+
+        function updatePhysiology() {
+            // Update Visual Breath duration
+            const duration = 4.0 / params.metabolism;
+            document.documentElement.style.setProperty('--breath-duration', duration + 's');
+        }
 
         // --- 核心逻辑 ---
         const params = { po2: 1.0, displayPo2: 1.0, visualSP: 1.2, computerSP: 1.2, depthM: 10, depthATA: 2.0, loopVolume: 6.0, metabolism: 1.0, mode: 'manual', cmfRate: 0.8, needleBase: 0.8, needleUncompensated: false, solenoidRate: 10.0, mavRate: 30.0, diluentFO2: 0.21, diluentFHe: 0.35, cells: [1.0, 1.0, 1.0], currentPulseLimit: 0 };
@@ -2155,6 +2163,7 @@
 
             params.metabolism = sac / 20;
             updateUIVal('disp-sac', `SAC: ~${sac.toFixed(0)} L/min | O2: ${(sac / 20).toFixed(1)} L/min`);
+            updatePhysiology();
             refreshUI();
         }
 
@@ -2182,7 +2191,9 @@
             document.getElementById('btn-vo2-custom').classList.remove('active-custom');
             panel.classList.remove('active');
             panel.querySelectorAll('input').forEach(input => input.disabled = true);
-            params.metabolism = val; document.querySelectorAll('.btn-vo2').forEach(btn => btn.classList.toggle('active-vo2', Math.abs(parseFloat(btn.dataset.val) - val) < 0.01)); updateUIVal('disp-sac', `SAC: ~${(val * 20).toFixed(0)} L/min | O2: ${val.toFixed(1)} L/min`); refreshUI();
+            params.metabolism = val; document.querySelectorAll('.btn-vo2').forEach(btn => btn.classList.toggle('active-vo2', Math.abs(parseFloat(btn.dataset.val) - val) < 0.01)); updateUIVal('disp-sac', `SAC: ~${(val * 20).toFixed(0)} L/min | O2: ${val.toFixed(1)} L/min`);
+            updatePhysiology();
+            refreshUI();
         }
 
         function setMode(mode) {
