@@ -108,6 +108,43 @@
             position: relative;
         }
 
+        .signature-contact {
+            color: inherit;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: inline-block;
+            position: relative;
+            text-align: right;
+            height: 1.2em;
+            overflow: hidden;
+            vertical-align: bottom;
+        }
+
+        .signature-contact span {
+            display: block;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .signature-contact .hover-text {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            color: var(--accent-blue);
+            text-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+        }
+
+        .signature-contact:hover .original-text {
+            transform: translateY(-100%);
+            opacity: 0;
+        }
+
+        .signature-contact:hover .hover-text {
+            transform: translateY(-100%);
+            opacity: 1;
+        }
+
         .audio-ctrl {
             display: flex;
             align-items: center;
@@ -1519,7 +1556,10 @@
             </div>
         </div>
         <div class="header-right">
-            <div>POWERGX INC. MYRON YU（Aka.雪夜叉）</div>
+            <a href="mailto:myron.yu@powergx.co.jp" class="signature-contact">
+                <span class="original-text">POWERGX INC. MYRON YU（Aka.雪夜叉）</span>
+                <span class="hover-text">Contact Us</span>
+            </a>
             <div class="audio-ctrl audio-prompt-pulse">
                 <label>Audio</label>
                 <input type="checkbox" id="audio-toggle"
@@ -2170,17 +2210,12 @@
             const now = Date.now(); let dt = now - lastTime; if (dt > 100) dt = 16; lastTime = now;
             const dtMin = dt / 60000; params.po2 = Math.min(params.depthATA, Math.max(0, params.po2));
             if (manualDil) {
-                const decayFactor = 1 - Math.exp(-5 * dtMin * 60);
+                // 稀释气注入深度补偿：深度越深，注入的摩尔量越大，混合越快
+                // 浅水区 (1 ATA) 系数约为 1.2，深水区 (9 ATA) 系数约为 10+
+                const baseSpeed = 0.6;
+                const decayFactor = 1 - Math.exp(-baseSpeed * params.depthATA * dtMin * 60);
                 params.po2 = params.po2 * (1 - decayFactor) + (params.diluentFO2 * params.depthATA) * decayFactor; params.displayPo2 = params.po2;
             } else {
-                let flow_legit = -params.metabolism;
-                if (params.mode === 'cmf' || params.mode === 'hybrid') flow_legit += params.cmfRate;
-                if (params.mode === 'needle') {
-                    let current = params.needleBase;
-                    if (params.needleUncompensated) current *= (Math.max(0, 10.0 - params.depthATA) / 9.0);
-                    flow_legit += current;
-                }
-                if (manualO2) flow_legit += params.mavRate;
                 let flow_sol = 0; solenoidActive = false;
                 if (params.mode === 'solenoid' || params.mode === 'hybrid') {
                     solenoidTimer += dt;
@@ -2197,8 +2232,24 @@
                 }
                 if (solenoidActive && !lastSolenoidState) audioManager.playClick();
                 lastSolenoidState = solenoidActive;
+
                 let real_inc_sol = (flow_sol * dtMin * params.depthATA) / params.loopVolume;
-                let real_inc_legit = (flow_legit * dtMin * 1.0) / params.loopVolume;
+
+                // 物理模型精修：
+                // 1. CMF 和 代谢 (metabolism) 是恒定质量流，其对 PPO2 的单位时间贡献在恒温及恒定回路体积下不随深度变化 (1.0 ATA)
+                // 2. MAV O2 注入是体积流，受环境压力影响，深度越深，注入的氧气摩尔量越大，PPO2 变化越剧烈 (depthATA)
+                let flow_base = -params.metabolism;
+                if (params.mode === 'cmf' || params.mode === 'hybrid') flow_base += params.cmfRate;
+                if (params.mode === 'needle') {
+                    let current = params.needleBase;
+                    if (params.needleUncompensated) current *= (Math.max(0, 10.0 - params.depthATA) / 9.0);
+                    flow_base += current;
+                }
+
+                let mav_o2_flow = manualO2 ? params.mavRate : 0;
+
+                let real_inc_legit = ((flow_base * 1.0) + (mav_o2_flow * params.depthATA)) * dtMin / params.loopVolume;
+
                 params.po2 += (real_inc_sol + real_inc_legit); params.displayPo2 += real_inc_legit;
                 if (solenoidActive) params.displayPo2 = Math.min(params.computerSP + 0.05, params.displayPo2 + real_inc_sol);
                 if (!solenoidActive && params.po2 > params.displayPo2) params.displayPo2 = params.po2;
