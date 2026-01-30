@@ -135,14 +135,24 @@
             text-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
         }
 
-        .signature-contact:hover .original-text {
-            transform: translateY(-100%);
-            opacity: 0;
+        /* PC Only Hover Effect */
+        @media (hover: hover) {
+            .signature-contact:hover .original-text {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+
+            .signature-contact:hover .hover-text {
+                transform: translateY(-100%);
+                opacity: 1;
+            }
         }
 
-        .signature-contact:hover .hover-text {
-            transform: translateY(-100%);
-            opacity: 1;
+        /* iPad/Touch Feedback */
+        .signature-contact:active {
+            transform: scale(0.95);
+            opacity: 0.7;
+            transition: transform 0.1s;
         }
 
         .audio-ctrl {
@@ -1556,7 +1566,8 @@
             </div>
         </div>
         <div class="header-right">
-            <a href="mailto:myron.yu@powergx.co.jp" class="signature-contact">
+            <a href="mailto:myron.yu@powergx.co.jp" class="signature-contact" onclick="this.blur()"
+                ontouchend="this.blur()">
                 <span class="original-text">POWERGX INC. MYRON YU（Aka.雪夜叉）</span>
                 <span class="hover-text">Contact Us</span>
             </a>
