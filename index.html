@@ -134,9 +134,33 @@
             cursor: pointer;
             display: inline-block;
             position: relative;
-            height: 1.25em;
+            height: 1.4em;
             overflow: hidden;
             vertical-align: bottom;
+            white-space: nowrap;
+        }
+
+        /* Passionate Red Pulse for DPV Link */
+        .dpv-order-link .original-text {
+            color: #ff4444;
+            animation: red-pulse 2s infinite ease-in-out;
+        }
+
+        @keyframes red-pulse {
+            0% {
+                text-shadow: 0 0 2px rgba(255, 68, 68, 0.2);
+                opacity: 0.8;
+            }
+
+            50% {
+                text-shadow: 0 0 12px rgba(255, 68, 68, 0.8);
+                opacity: 1;
+            }
+
+            100% {
+                text-shadow: 0 0 2px rgba(255, 68, 68, 0.2);
+                opacity: 0.8;
+            }
         }
 
         .dpv-order-link span,
