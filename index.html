@@ -136,6 +136,140 @@
             }
         }
 
+        /* --- 开机动画样式 --- */
+        #startup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 1.5s ease-in-out;
+        }
+
+        .startup-content {
+            position: relative;
+            text-align: center;
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 揭幕容器：修正位移范围 */
+        .reveal-container {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            padding: 20px 0;
+            /* 蒙版：亮部窗口放宽 */
+            -webkit-mask-image: linear-gradient(to right,
+                    rgba(0, 0, 0, 0) 0%,
+                    rgba(0, 0, 0, 0) 35%,
+                    rgba(0, 0, 0, 1) 50%,
+                    rgba(0, 0, 0, 0) 65%,
+                    rgba(0, 0, 0, 0) 100%);
+            mask-image: linear-gradient(to right,
+                    rgba(0, 0, 0, 0) 0%,
+                    rgba(0, 0, 0, 0) 35%,
+                    rgba(0, 0, 0, 1) 50%,
+                    rgba(0, 0, 0, 0) 65%,
+                    rgba(0, 0, 0, 0) 100%);
+            -webkit-mask-size: 300% 100%;
+            mask-size: 300% 100%;
+            -webkit-mask-repeat: no-repeat;
+            mask-repeat: no-repeat;
+            -webkit-mask-position: 100% 0;
+            /* 修正：紧贴起始点 */
+            mask-position: 100% 0;
+            transition: filter 1s ease;
+        }
+
+        .reveal-all {
+            -webkit-mask-image: none !important;
+            mask-image: none !important;
+            filter: brightness(0.9) !important;
+            transition: all 1s ease;
+        }
+
+        .startup-logo {
+            height: clamp(50px, 12vw, 80px);
+            width: auto;
+            margin-bottom: 30px;
+            display: block;
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.4));
+        }
+
+        .startup-dpv {
+            max-width: 85%;
+            height: auto;
+            display: block;
+            mix-blend-mode: screen;
+        }
+
+        /* 动态发光条 */
+        .sweep-bar {
+            position: absolute;
+            top: -50%;
+            left: -100%;
+            width: 20%;
+            height: 200%;
+            background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 1) 50%, rgba(255, 255, 255, 0) 100%);
+            box-shadow: 0 0 50px 10px rgba(255, 255, 255, 0.4);
+            transform: rotate(20deg);
+            pointer-events: none;
+            z-index: 20;
+            opacity: 0;
+        }
+
+        .sweep-active .sweep-bar {
+            opacity: 1;
+            animation: sweepMove 4.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        .sweep-active #reveal-target {
+            animation: maskMove 4.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes sweepMove {
+            0% {
+                left: -100%;
+            }
+
+            100% {
+                left: 180%;
+            }
+        }
+
+        @keyframes maskMove {
+            0% {
+                -webkit-mask-position: 100% 0;
+                mask-position: 100% 0;
+            }
+
+            100% {
+                -webkit-mask-position: 0% 0;
+                mask-position: 0% 0;
+            }
+        }
+
+        .startup-text {
+            margin-top: 40px;
+            font-size: 0.8em;
+            color: #222;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            font-weight: 300;
+        }
+
         .audio-ctrl label {
             font-size: 9px;
             color: #555;
@@ -331,6 +465,7 @@
 
             .header-container,
             .stage-container,
+            .main-controls,
             .footer-signature {
                 max-width: 1200px;
             }
@@ -586,7 +721,7 @@
             grid-template-columns: 100px 1fr 140px;
             gap: 8px;
             width: 100%;
-            max-width: 950px;
+            max-width: 1200px;
         }
 
         .vertical-panel {
@@ -1349,6 +1484,18 @@
 </head>
 
 <body>
+
+    <!-- Startup Animation Overlay -->
+    <div id="startup-overlay">
+        <div class="startup-content" id="startup-box">
+            <div class="reveal-container" id="reveal-target">
+                <img src="powergxicon.png" class="startup-logo" alt="Logo">
+                <img src="triggerfish.png" class="startup-dpv" alt="Triggerfish DPV">
+                <div class="sweep-bar"></div>
+            </div>
+            <div class="startup-text">System Initializing...</div>
+        </div>
+    </div>
 
     <div class="header-container">
         <div class="header-left" style="flex-direction:row; align-items:center; gap:12px;">
@@ -2184,11 +2331,36 @@
             loop();
             setInterval(loop, 16);
 
-            // 10秒视觉诱导：删除闪烁类名
+            // --- 全新开机序列逻辑 ---
+            const overlay = document.getElementById('startup-overlay');
+            const startupBox = document.getElementById('startup-box');
+            const revealTarget = document.getElementById('reveal-target');
+
+            // 1. 启动扫光/遮罩动画
             setTimeout(() => {
-                const ac = document.querySelector('.audio-ctrl');
-                if (ac) ac.classList.remove('audio-prompt-pulse');
-            }, 10000);
+                startupBox.classList.add('sweep-active');
+            }, 500);
+
+            // 2. 扫光接近尾声时，平滑显示全貌
+            setTimeout(() => {
+                revealTarget.classList.add('reveal-all');
+            }, 4200);
+
+            // 3. 彻底淡出并开启音频引导
+            setTimeout(() => {
+                overlay.style.opacity = '0';
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+
+                    const audioCtrl = document.querySelector('.audio-ctrl');
+                    if (audioCtrl) {
+                        audioCtrl.classList.add('audio-prompt-pulse');
+                        setTimeout(() => {
+                            audioCtrl.classList.remove('audio-prompt-pulse');
+                        }, 10000);
+                    }
+                }, 1000);
+            }, 5500); // 整体时长：约 5 秒后开始淡出
 
             // Audio Init
             const volSlider = document.getElementById('audio-volume');
