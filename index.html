@@ -108,6 +108,25 @@
             position: relative;
         }
 
+        /* Footer Containers */
+        .footer-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            width: 100%;
+            max-width: 1200px;
+            margin-top: 15px;
+            padding: 0 5px 10px 5px;
+            color: #444;
+            font-size: 0.75em;
+            font-weight: bold;
+        }
+
+        .footer-signature {
+            text-align: right;
+        }
+
+        .dpv-order-link,
         .signature-contact {
             color: inherit;
             text-decoration: none;
@@ -115,17 +134,18 @@
             cursor: pointer;
             display: inline-block;
             position: relative;
-            text-align: right;
-            height: 1.2em;
+            height: 1.25em;
             overflow: hidden;
             vertical-align: bottom;
         }
 
+        .dpv-order-link span,
         .signature-contact span {
             display: block;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
+        .dpv-order-link .hover-text,
         .signature-contact .hover-text {
             position: absolute;
             top: 100%;
@@ -137,11 +157,14 @@
 
         /* PC Only Hover Effect */
         @media (hover: hover) {
+
+            .dpv-order-link:hover .original-text,
             .signature-contact:hover .original-text {
                 transform: translateY(-100%);
                 opacity: 0;
             }
 
+            .dpv-order-link:hover .hover-text,
             .signature-contact:hover .hover-text {
                 transform: translateY(-100%);
                 opacity: 1;
@@ -149,17 +172,19 @@
         }
 
         /* Forced Hover State (Used for Touch Devices) */
+        .dpv-order-link.forced-hover .original-text,
         .signature-contact.forced-hover .original-text {
             transform: translateY(-100%);
             opacity: 0;
         }
 
+        .dpv-order-link.forced-hover .hover-text,
         .signature-contact.forced-hover .hover-text {
             transform: translateY(-100%);
             opacity: 1;
         }
 
-        /* Feedback for the active state */
+        .dpv-order-link:active,
         .signature-contact:active {
             transform: scale(0.98);
         }
@@ -1857,37 +1882,57 @@
         </div>
     </div>
 
-    <div class="footer-signature">© POWERGX FLUIDICS LAB 2026</div>
+    <div class="footer-container">
+        <div class="footer-left">
+            <a href="javascript:void(0)" class="dpv-order-link" id="dpv-link"
+                onclick="handleFooterLinkClick(event, 'dpv-link', 'mailto:info@powerg.co.jp')">
+                <span class="original-text">Need Furious Speed</span>
+                <span class="hover-text">Order Triggerfish DPV</span>
+            </a>
+        </div>
+        <div class="footer-signature">
+            <a href="javascript:void(0)" class="signature-contact" id="sig-link"
+                onclick="handleFooterLinkClick(event, 'sig-link', 'mailto:myron.yu@powergx.co.jp')">
+                <span class="original-text">POWERGX INC. MYRON YU（Aka.雪夜叉）</span>
+                <span class="hover-text">Contact Us</span>
+            </a>
+            <br>
+            © POWERGX FLUIDICS LAB 2026
+        </div>
+    </div>
 
     <script>
-        // --- Signature Interaction Manager (Mobile Anti-Accidental Click) ---
-        let signatureTimer = null;
-        function handleSignatureClick(e) {
-            const link = document.getElementById('sig-link');
+        // --- Footer Link Interaction Manager (PC: Hover | Mobile: 2-step click) ---
+        const footerTimers = {};
+        function handleFooterLinkClick(e, elementId, mailtoTarget) {
+            const link = document.getElementById(elementId);
             const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
 
             // Desktop logic: Normal mailto (hover logic is CSS-only)
             if (!isTouch) {
-                window.location.href = "mailto:myron.yu@powergx.co.jp";
+                window.location.href = mailtoTarget;
                 return;
             }
 
             // Mobile/Touch Logic: 2-step verification
             if (!link.classList.contains('forced-hover')) {
-                // Step 1: Just show "Contact Us" as a warning
+                // Step 1: Just show warning text
                 link.classList.add('forced-hover');
 
                 // Set 5s timeout to reset
-                if (signatureTimer) clearTimeout(signatureTimer);
-                signatureTimer = setTimeout(() => {
+                if (footerTimers[elementId]) clearTimeout(footerTimers[elementId]);
+                footerTimers[elementId] = setTimeout(() => {
                     link.classList.remove('forced-hover');
-                    signatureTimer = null;
+                    delete footerTimers[elementId];
                 }, 5000);
             } else {
                 // Step 2: Second click within 5s opens mailto
-                window.location.href = "mailto:myron.yu@powergx.co.jp";
+                window.location.href = mailtoTarget;
                 link.classList.remove('forced-hover');
-                if (signatureTimer) clearTimeout(signatureTimer);
+                if (footerTimers[elementId]) {
+                    clearTimeout(footerTimers[elementId]);
+                    delete footerTimers[elementId];
+                }
             }
         }
 
