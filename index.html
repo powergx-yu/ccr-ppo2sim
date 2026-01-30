@@ -148,6 +148,22 @@
             }
         }
 
+        /* Forced Hover State (Used for Touch Devices) */
+        .signature-contact.forced-hover .original-text {
+            transform: translateY(-100%);
+            opacity: 0;
+        }
+
+        .signature-contact.forced-hover .hover-text {
+            transform: translateY(-100%);
+            opacity: 1;
+        }
+
+        /* Feedback for the active state */
+        .signature-contact:active {
+            transform: scale(0.98);
+        }
+
         /* iPad/Touch Feedback */
         .signature-contact:active {
             transform: scale(0.95);
@@ -1566,8 +1582,7 @@
             </div>
         </div>
         <div class="header-right">
-            <a href="mailto:myron.yu@powergx.co.jp" class="signature-contact" onclick="this.blur()"
-                ontouchend="this.blur()">
+            <a href="javascript:void(0)" class="signature-contact" id="sig-link" onclick="handleSignatureClick(event)">
                 <span class="original-text">POWERGX INC. MYRON YU（Aka.雪夜叉）</span>
                 <span class="hover-text">Contact Us</span>
             </a>
@@ -1845,6 +1860,37 @@
     <div class="footer-signature">© POWERGX FLUIDICS LAB 2026</div>
 
     <script>
+        // --- Signature Interaction Manager (Mobile Anti-Accidental Click) ---
+        let signatureTimer = null;
+        function handleSignatureClick(e) {
+            const link = document.getElementById('sig-link');
+            const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+
+            // Desktop logic: Normal mailto (hover logic is CSS-only)
+            if (!isTouch) {
+                window.location.href = "mailto:myron.yu@powergx.co.jp";
+                return;
+            }
+
+            // Mobile/Touch Logic: 2-step verification
+            if (!link.classList.contains('forced-hover')) {
+                // Step 1: Just show "Contact Us" as a warning
+                link.classList.add('forced-hover');
+
+                // Set 5s timeout to reset
+                if (signatureTimer) clearTimeout(signatureTimer);
+                signatureTimer = setTimeout(() => {
+                    link.classList.remove('forced-hover');
+                    signatureTimer = null;
+                }, 5000);
+            } else {
+                // Step 2: Second click within 5s opens mailto
+                window.location.href = "mailto:myron.yu@powergx.co.jp";
+                link.classList.remove('forced-hover');
+                if (signatureTimer) clearTimeout(signatureTimer);
+            }
+        }
+
         // --- 音频管理器 ---
         const audioManager = {
             ctx: null, masterGain: null, oceanGain: null, hissGain: null, dpvGain: null, noiseBuffer: null,
