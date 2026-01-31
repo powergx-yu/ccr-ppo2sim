@@ -143,7 +143,8 @@
             min-width: fit-content;
         }
 
-        .dpv-order-link .width-setter {
+        .dpv-order-link .width-setter,
+        .signature-contact .width-setter {
             visibility: hidden;
             display: block;
             height: 0;
@@ -1610,10 +1611,133 @@
                 font-size: 1.1em;
             }
         }
+
+        /* --- Legal Modal Styles --- */
+        #legal-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        #legal-modal.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .legal-content {
+            background: rgba(20, 25, 35, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            max-width: 600px;
+            width: 100%;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            color: #eee;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            position: relative;
+        }
+
+        .legal-header {
+            font-size: 1.5em;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--accent-blue);
+            padding-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        .legal-section {
+            margin-bottom: 20px;
+        }
+
+        .legal-section-title {
+            font-size: 0.9em;
+            color: var(--accent-blue);
+            text-transform: uppercase;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .legal-text {
+            font-size: 0.85em;
+            line-height: 1.6;
+            color: #ccc;
+        }
+
+        .legal-text strong {
+            color: #fff;
+        }
+
+        .legal-close-btn {
+            background: var(--accent-blue);
+            color: #000;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            float: right;
+            margin-top: 10px;
+            transition: all 0.2s;
+        }
+
+        .legal-close-btn:hover {
+            transform: scale(1.05);
+            background: #00e5ff;
+        }
     </style>
 </head>
 
-<body>
+<body onclick="if(event.target.id==='legal-modal') hideLegal()">
+
+    <!-- Legal Modal -->
+    <div id="legal-modal">
+        <div class="legal-content">
+            <div class="legal-header">Legal & Safety Notice</div>
+
+            <div class="legal-section">
+                <div class="legal-section-title">Proprietary Rights / 版权所有</div>
+                <div class="legal-text">
+                    All algorithms, simulation logic, and UI assets are the sole property of <strong>POWERGX
+                        INC.</strong>
+                    所有算法、模拟逻辑及 UI 资产均归 POWERGX INC. 独家所有。
+                </div>
+            </div>
+
+            <div class="legal-section">
+                <div class="legal-section-title">Restrictions / 禁止条款</div>
+                <div class="legal-text">
+                    Unauthorized reverse engineering, modification, distribution, or illegal hosting is strictly
+                    prohibited.
+                    严禁任何未经授权的反向工程、二次开发、商业传播或私自架设镜像站点。
+                </div>
+            </div>
+
+            <div class="legal-section">
+                <div class="legal-section-title">Safety Disclaimer / 安全免责</div>
+                <div class="legal-text" style="color: #ff4444; font-weight: bold;">
+                    FOR EDUCATIONAL USE ONLY. This software is a theoretical tool and should NOT be used for real-world
+                    life-support dive planning.
+                    仅供教学参考。本软件为理论模拟工具，严禁用于真实潜水减压规划。开发者不承担任何因此产生的风险。
+                </div>
+            </div>
+
+            <button class="legal-close-btn" onclick="hideLegal()">I UNDERSTAND</button>
+        </div>
+    </div>
 
     <!-- Startup Animation Overlay -->
     <div id="startup-overlay">
@@ -1812,7 +1936,7 @@
                                     <div class="val" id="val-dil-o2">21%</div>
                                 </div>
                                 <input type="range" id="input-dil-o2" min="5" max="100" value="21"
-                                    oninput="applyCustomDil()" disabled>
+                                    oninput="applyCustomDil('input-dil-o2')" disabled>
                             </div>
                             <div class="custom-field">
                                 <div class="field-header">
@@ -1820,7 +1944,7 @@
                                     <div class="val" id="val-dil-he">0%</div>
                                 </div>
                                 <input type="range" id="input-dil-he" min="0" max="95" value="0"
-                                    oninput="applyCustomDil()" disabled>
+                                    oninput="applyCustomDil('input-dil-he')" disabled>
                             </div>
                         </div>
                     </div>
@@ -1927,6 +2051,11 @@
             </a>
         </div>
         <div class="footer-signature">
+            <a href="javascript:void(0)" class="signature-contact" id="legal-link" onclick="handleLegalClick(event)">
+                <span class="original-text" style="opacity: 0.6;">[ LEGAL ]</span>
+                <span class="hover-text">[ NOTICE ]</span>
+                <span class="width-setter">[ NOTICE ]</span>
+            </a>
             © POWERGX FLUIDICS LAB 2026
         </div>
     </div>
@@ -1962,6 +2091,44 @@
                 if (footerTimers[elementId]) {
                     clearTimeout(footerTimers[elementId]);
                     delete footerTimers[elementId];
+                }
+            }
+        }
+
+        function showLegal() {
+            const modal = document.getElementById('legal-modal');
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('active'), 10);
+        }
+
+        function hideLegal() {
+            const modal = document.getElementById('legal-modal');
+            modal.classList.remove('active');
+            setTimeout(() => modal.style.display = 'none', 400);
+        }
+
+        function handleLegalClick(e) {
+            const link = document.getElementById('legal-link');
+            const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+
+            if (!isTouch) {
+                showLegal();
+                return;
+            }
+
+            if (!link.classList.contains('forced-hover')) {
+                link.classList.add('forced-hover');
+                if (footerTimers['legal-link']) clearTimeout(footerTimers['legal-link']);
+                footerTimers['legal-link'] = setTimeout(() => {
+                    link.classList.remove('forced-hover');
+                    delete footerTimers['legal-link'];
+                }, 5000);
+            } else {
+                showLegal();
+                link.classList.remove('forced-hover');
+                if (footerTimers['legal-link']) {
+                    clearTimeout(footerTimers['legal-link']);
+                    delete footerTimers['legal-link'];
                 }
             }
         }
@@ -2257,9 +2424,21 @@
             }
         }
 
-        function applyCustomDil() {
-            const o2 = parseInt(document.getElementById('input-dil-o2').value);
-            const he = parseInt(document.getElementById('input-dil-he').value);
+        function applyCustomDil(sourceId) {
+            let o2 = parseInt(document.getElementById('input-dil-o2').value);
+            let he = parseInt(document.getElementById('input-dil-he').value);
+
+            // Constrain Sum <= 100%
+            if (o2 + he > 100) {
+                if (sourceId === 'input-dil-o2') {
+                    he = 100 - o2;
+                    document.getElementById('input-dil-he').value = he;
+                } else {
+                    o2 = 100 - he;
+                    document.getElementById('input-dil-o2').value = o2;
+                }
+            }
+
             document.getElementById('val-dil-o2').innerText = o2 + '%';
             document.getElementById('val-dil-he').innerText = he + '%';
 
