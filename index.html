@@ -1698,46 +1698,242 @@
             transform: scale(1.05);
             background: #00e5ff;
         }
+
+        /* --- Documentation Modal Styles --- */
+        .doc-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .doc-modal.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .doc-modal-content {
+            background: linear-gradient(135deg, rgba(15, 20, 30, 0.95), rgba(25, 30, 45, 0.95));
+            border: 1px solid rgba(0, 229, 255, 0.3);
+            border-radius: 20px;
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(0, 229, 255, 0.1);
+            position: relative;
+            overflow-y: auto;
+            color: #eee;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        .doc-close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: transparent;
+            border: none;
+            color: #999;
+            font-size: 2.5em;
+            cursor: pointer;
+            line-height: 1;
+            transition: all 0.3s;
+            z-index: 10;
+        }
+
+        .doc-close-btn:hover {
+            color: var(--accent-blue);
+            transform: rotate(90deg);
+        }
+
+        /* Language Selector View */
+        .lang-selector-view {
+            text-align: center;
+        }
+
+        .lang-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .lang-btn {
+            background: linear-gradient(135deg, rgba(0, 229, 255, 0.1), rgba(0, 100, 255, 0.1));
+            border: 2px solid rgba(0, 229, 255, 0.3);
+            border-radius: 15px;
+            padding: 30px 40px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            min-width: 150px;
+        }
+
+        .lang-btn:hover {
+            background: linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(0, 100, 255, 0.2));
+            border-color: var(--accent-blue);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 229, 255, 0.3);
+        }
+
+        .lang-flag {
+            font-size: 3em;
+        }
+
+        .lang-name {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        /* Document Content View */
+        .doc-content-view {
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .doc-back-btn {
+            background: rgba(0, 229, 255, 0.1);
+            border: 1px solid rgba(0, 229, 255, 0.3);
+            color: var(--accent-blue);
+            padding: 8px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+
+        .doc-back-btn:hover {
+            background: rgba(0, 229, 255, 0.2);
+            transform: translateX(-5px);
+        }
+
+        .doc-text {
+            line-height: 1.8;
+            color: #ccc;
+        }
+
+        .doc-text h1 {
+            color: var(--accent-blue);
+            font-size: 2em;
+            margin-top: 0;
+            margin-bottom: 20px;
+            border-bottom: 2px solid rgba(0, 229, 255, 0.3);
+            padding-bottom: 10px;
+        }
+
+        .doc-text h2 {
+            color: #fff;
+            font-size: 1.5em;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--accent-blue);
+            padding-left: 15px;
+        }
+
+        .doc-text h3 {
+            color: var(--accent-green);
+            font-size: 1.2em;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        .doc-text ul,
+        .doc-text ol {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        .doc-text li {
+            margin-bottom: 8px;
+        }
+
+        .doc-text strong {
+            color: #fff;
+        }
+
+        .doc-text code {
+            background: rgba(0, 229, 255, 0.1);
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: var(--accent-blue);
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+
+        .doc-text a {
+            color: var(--accent-blue);
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.3s;
+        }
+
+        .doc-text a:hover {
+            border-bottom-color: var(--accent-blue);
+        }
+
+        .doc-text hr {
+            border: none;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin: 30px 0;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .doc-modal-content {
+                padding: 25px;
+                max-height: 95vh;
+            }
+
+            .lang-buttons {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .lang-btn {
+                width: 100%;
+                padding: 25px;
+            }
+
+            .doc-text h1 {
+                font-size: 1.5em;
+            }
+
+            .doc-text h2 {
+                font-size: 1.2em;
+            }
+        }
     </style>
 </head>
 
-<body onclick="if(event.target.id==='legal-modal') hideLegal()">
+<body>
 
-    <!-- Legal Modal -->
-    <div id="legal-modal">
-        <div class="legal-content">
-            <div class="legal-header">Legal & Safety Notice</div>
 
-            <div class="legal-section">
-                <div class="legal-section-title">Proprietary Rights / 版权所有</div>
-                <div class="legal-text">
-                    All algorithms, simulation logic, and UI assets are the sole property of <strong>POWERGX
-                        INC.</strong>
-                    所有算法、模拟逻辑及 UI 资产均归 POWERGX INC. 独家所有。
-                </div>
-            </div>
-
-            <div class="legal-section">
-                <div class="legal-section-title">Restrictions / 禁止条款</div>
-                <div class="legal-text">
-                    Unauthorized reverse engineering, modification, distribution, or illegal hosting is strictly
-                    prohibited.
-                    严禁任何未经授权的反向工程、二次开发、商业传播或私自架设镜像站点。
-                </div>
-            </div>
-
-            <div class="legal-section">
-                <div class="legal-section-title">Safety Disclaimer / 安全免责</div>
-                <div class="legal-text" style="color: #ff4444; font-weight: bold;">
-                    FOR EDUCATIONAL USE ONLY. This software is a theoretical tool and should NOT be used for real-world
-                    life-support dive planning.
-                    仅供教学参考。本软件为理论模拟工具，严禁用于真实潜水减压规划。开发者不承担任何因此产生的风险。
-                </div>
-            </div>
-
-            <button class="legal-close-btn" onclick="hideLegal()">I UNDERSTAND</button>
-        </div>
-    </div>
 
     <!-- Startup Animation Overlay -->
     <div id="startup-overlay">
@@ -1765,10 +1961,10 @@
             </div>
         </div>
         <div class="header-right">
-            <a href="javascript:void(0)" class="signature-contact" id="sig-link"
-                onclick="handleFooterLinkClick(event, 'sig-link', 'mailto:myron.yu@powergx.co.jp')">
+            <a href="javascript:void(0)" class="signature-contact" id="sig-link" onclick="handleSignatureClick(event)">
                 <span class="original-text">POWERGX INC. MYRON YU（Aka.雪夜叉）</span>
-                <span class="hover-text">Contact Us</span>
+                <span class="hover-text">Usage & Legal</span>
+                <span class="width-setter">Usage & Legal</span>
             </a>
             <div class="audio-ctrl audio-prompt-pulse">
                 <label>Audio</label>
@@ -2051,12 +2247,50 @@
             </a>
         </div>
         <div class="footer-signature">
-            <a href="javascript:void(0)" class="signature-contact" id="legal-link" onclick="handleLegalClick(event)">
-                <span class="original-text" style="opacity: 0.6;">[ LEGAL ]</span>
-                <span class="hover-text">[ NOTICE ]</span>
-                <span class="width-setter">[ NOTICE ]</span>
-            </a>
             © POWERGX FLUIDICS LAB 2026
+        </div>
+    </div>
+
+    <!-- Documentation Modal -->
+    <div id="doc-modal" class="doc-modal">
+        <div class="doc-modal-content">
+            <button class="doc-close-btn" onclick="closeDocModal()">&times;</button>
+
+            <!-- Language Selector View -->
+            <div id="lang-selector" class="lang-selector-view">
+                <h2 style="color: var(--accent-blue); margin-bottom: 30px; text-align: center;">Select Language / 选择语言 /
+                    言語を選択</h2>
+                <div class="lang-buttons">
+                    <button class="lang-btn" onclick="showDoc('cn')">
+                        <span class="lang-flag">🇨🇳</span>
+                        <span class="lang-name">中文</span>
+                    </button>
+                    <button class="lang-btn" onclick="showDoc('en')">
+                        <span class="lang-flag">🇺🇸</span>
+                        <span class="lang-name">English</span>
+                    </button>
+                    <button class="lang-btn" onclick="showDoc('jp')">
+                        <span class="lang-flag">🇯🇵</span>
+                        <span class="lang-name">日本語</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Document Content Views (Hidden by default) -->
+            <div id="doc-content-cn" class="doc-content-view" style="display: none;">
+                <button class="doc-back-btn" onclick="backToLangSelector()">← Back</button>
+                <div class="doc-text" id="doc-cn-text"></div>
+            </div>
+
+            <div id="doc-content-en" class="doc-content-view" style="display: none;">
+                <button class="doc-back-btn" onclick="backToLangSelector()">← Back</button>
+                <div class="doc-text" id="doc-en-text"></div>
+            </div>
+
+            <div id="doc-content-jp" class="doc-content-view" style="display: none;">
+                <button class="doc-back-btn" onclick="backToLangSelector()">← Back</button>
+                <div class="doc-text" id="doc-jp-text"></div>
+            </div>
         </div>
     </div>
 
@@ -2095,42 +2329,94 @@
             }
         }
 
-        function showLegal() {
-            const modal = document.getElementById('legal-modal');
-            modal.style.display = 'flex';
-            setTimeout(() => modal.classList.add('active'), 10);
+        // --- Documentation Modal Handlers ---
+        function handleSignatureClick(e) {
+            const link = document.getElementById('sig-link');
+            const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+
+            // Desktop logic: Open modal directly
+            if (!isTouch) {
+                openDocModal();
+                return;
+            }
+
+            // Mobile/Touch Logic: 2-step verification
+            if (!link.classList.contains('forced-hover')) {
+                // Step 1: Show hover text
+                link.classList.add('forced-hover');
+
+                if (footerTimers['sig-link']) clearTimeout(footerTimers['sig-link']);
+                footerTimers['sig-link'] = setTimeout(() => {
+                    link.classList.remove('forced-hover');
+                    delete footerTimers['sig-link'];
+                }, 5000);
+            } else {
+                // Step 2: Open modal
+                openDocModal();
+                link.classList.remove('forced-hover');
+                if (footerTimers['sig-link']) {
+                    clearTimeout(footerTimers['sig-link']);
+                    delete footerTimers['sig-link'];
+                }
+            }
         }
 
-        function hideLegal() {
-            const modal = document.getElementById('legal-modal');
+        function openDocModal() {
+            const modal = document.getElementById('doc-modal');
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('active'), 10);
+
+            // Reset to language selector view
+            document.getElementById('lang-selector').style.display = 'block';
+            document.getElementById('doc-content-cn').style.display = 'none';
+            document.getElementById('doc-content-en').style.display = 'none';
+            document.getElementById('doc-content-jp').style.display = 'none';
+
+            // Load documentation content if not already loaded
+            if (!window.docsLoaded) {
+                loadDocumentation();
+                window.docsLoaded = true;
+            }
+        }
+
+        function closeDocModal() {
+            const modal = document.getElementById('doc-modal');
             modal.classList.remove('active');
             setTimeout(() => modal.style.display = 'none', 400);
         }
 
-        function handleLegalClick(e) {
-            const link = document.getElementById('legal-link');
-            const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+        function showDoc(lang) {
+            document.getElementById('lang-selector').style.display = 'none';
+            document.getElementById('doc-content-cn').style.display = lang === 'cn' ? 'block' : 'none';
+            document.getElementById('doc-content-en').style.display = lang === 'en' ? 'block' : 'none';
+            document.getElementById('doc-content-jp').style.display = lang === 'jp' ? 'block' : 'none';
+        }
 
-            if (!isTouch) {
-                showLegal();
-                return;
-            }
+        function backToLangSelector() {
+            document.getElementById('lang-selector').style.display = 'block';
+            document.getElementById('doc-content-cn').style.display = 'none';
+            document.getElementById('doc-content-en').style.display = 'none';
+            document.getElementById('doc-content-jp').style.display = 'none';
+        }
 
-            if (!link.classList.contains('forced-hover')) {
-                link.classList.add('forced-hover');
-                if (footerTimers['legal-link']) clearTimeout(footerTimers['legal-link']);
-                footerTimers['legal-link'] = setTimeout(() => {
-                    link.classList.remove('forced-hover');
-                    delete footerTimers['legal-link'];
-                }, 5000);
-            } else {
-                showLegal();
-                link.classList.remove('forced-hover');
-                if (footerTimers['legal-link']) {
-                    clearTimeout(footerTimers['legal-link']);
-                    delete footerTimers['legal-link'];
-                }
+        // Close modal when clicking outside
+        document.addEventListener('click', function (e) {
+            const modal = document.getElementById('doc-modal');
+            if (e.target === modal) {
+                closeDocModal();
             }
+        });
+
+        // Load embedded documentation content
+        function loadDocumentation() {
+            // Chinese Documentation
+            document.getElementById('doc-cn-text').innerHTML = `<h1>CCR PPO2 模拟器:使用手册与法律声明</h1><h2>1. 访问与安装</h2><ul><li><strong>在线模拟器</strong>:通过浏览器访问 <a href="https://powergx-yu.github.io/ccr-ppo2sim/" target="_blank">https://powergx-yu.github.io/ccr-ppo2sim/</a></li><li><strong>平台支持与离线访问 (PWA)</strong>:<ul><li><strong>多平台支持</strong>:完美适配 <strong>PC/Mac</strong> (Chrome/Edge/Safari)、<strong>Android</strong> (Chrome)、<strong>iOS/iPadOS</strong> (Safari)。</li><li><strong>离线使用</strong>:本工具支持 <strong>PWA (渐进式网页应用)</strong> 技术。<ul><li><strong>安装方法</strong>:在浏览器菜单中选择"添加到主屏幕"(iOS) 或"安装应用"(Android/PC)。</li><li><strong>使用场景</strong>:安装后,即使在飞行模式或无网络的偏远潜点,也可正常使用全部功能。</li></ul></li></ul></li></ul><h2>2. 功能指引</h2><p>本工具旨在模拟密闭式循环呼吸器 (CCR) 的氧分压 (PPO2) 动态变化,辅助潜水员理解回路逻辑及异常处置。</p><h3>核心控制模块</h3><ul><li><strong>目标设定点 (Target SP)</strong>:<ul><li><strong>心理预期与参照</strong>:代表潜水员对本次潜水 PPO2 水平的理论期待值。</li><li><strong>非强制约束</strong>:在 UI 中作为视觉参照线,帮助潜水员衡量当前回路状态与理想目标的偏差。</li></ul></li><li><strong>深度 (Depth)</strong>:<ul><li>模拟环境压力变化对气体分压的影响(道尔顿定律),下潜时 PPO2 上升等现象。</li></ul></li><li><strong>希释气 (Diluent Gas)</strong>:<ul><li><strong>预设</strong>:<strong>Air</strong>、<strong>Tx 18/45</strong>、<strong>Tx 10/70</strong> 等标准技术潜水混合气。</li><li><strong>自定义</strong>:可手动设置 O2/He 比例,观察特殊气体计划对 PPO2 及 END (等效氮醉深度) 的影响。</li></ul></li><li><strong>代谢率/运动强度 (Workload)</strong>:<ul><li><strong>指标</strong>:主要以潜水员熟悉的 <strong>SAC (水面空气消耗率)</strong> 为显示单位,同时提供理论 <strong>VO2 (氧气摄取量)</strong>。</li><li><strong>场景</strong>:<strong>Rest</strong> (静止)、<strong>Norm</strong> (巡航)、<strong>Work</strong> (作业)、<strong>Stress</strong> (应激)、<strong>Panic</strong> (极限) 五档,模拟不同强度下的氧气消耗。</li><li><strong>自定义输入</strong>:支持精确输入 SAC 值,用于极限状况模拟或理论建模。</li></ul></li><li><strong>注氧系统 (Injection System)</strong>:<ul><li><strong>MAV (手动注入阀)</strong>:<ul><li><em>全模式通用</em>:无论何种模式,手动注入 O2 和 Diluent 始终可用。</li><li><em>用途</em>:维持设定点、冲洗回路、或在电子系统故障时作为备用手段。</li></ul></li><li><strong>mCCR (机械式定流量)</strong>:<ul><li><strong>CMF (恒定质量流)</strong>:通过针阀模拟"漏气式"持续供氧。调节流量以匹配代谢率,减少手动操作频率。</li></ul></li><li><strong>eCCR (电子控制)</strong>:<ul><li><strong>电磁阀 (Solenoid)</strong>:计算机控制的自动注氧。当 PPO2 低于<strong>下限设定点 (Low SP)</strong> 时,电磁阀自动开启补充氧气。</li></ul></li><li><strong>Hybrid (混合模式)</strong>:<ul><li>结合 mCCR 的持续流与 eCCR 的安全网。CMF 维持基础供氧,电磁阀在 PPO2 过低时作为"降落伞"介入。</li><li><strong>防尖峰逻辑</strong>:为避免 CMF 与电磁阀同时作用导致 PPO2 急剧上升,混合模式下电磁阀的开启时长约缩短 50%(模拟 rEvo 等真实设备逻辑)。</li></ul></li></ul></li></ul><h3>监控与反馈</h3><ul><li><strong>电池监控</strong>:三个独立氧气传感器实时显示数值,模拟标准 CCR 手持显示器。</li><li><strong>PPO2 实时曲线</strong>:<ul><li>时间轴滚动显示 PPO2 变化趋势。</li><li>帮助理解深度变化、代谢消耗、气体注入之间的时滞与交互。</li></ul></li><li><strong>注气可视化</strong>:<ul><li><strong>气体喷射效果</strong>:电磁阀、MAV、CMF 注气时,屏幕上会实时显示"喷射"动画。</li><li>直观反馈"什么在工作"以及"工作频率"。</li></ul></li><li><strong>生理报警</strong>:<ul><li><strong>高氧 (CNS)</strong>:PPO2 超过安全阈值(如 >1.6)时,屏幕显示红色警告,模拟痉挛风险。</li><li><strong>低氧 (Hypoxia)</strong>:PPO2 降至危险水平(如 <0.16)时,视野变紫/模糊,模拟即将昏迷(黑视)。</li><li><strong>氮醉</strong>:根据 END 深度,视野逐渐模糊。</li></ul></li><li><strong>音频与沉浸感</strong>:<ul><li><strong>环境音效</strong>:持续的深海背景噪音 (Ocean Noise) 增强沉浸感。</li><li><strong>呼吸声场</strong>:动态合成的呼吸声。呼吸频率与 VO2 代谢设置直接联动,VO2 越高,呼吸越急促。</li><li><strong>机械反馈</strong>:提供电磁阀 (Solenoid) 开启的"咔哒"声、手动注入阀 (MAV) 的高频气流声,以及 DPV (推进器) 的电机与切水声部分。</li></ul></li></ul><hr><h2>3. 免责声明</h2><p><strong>【重要:请务必在使用前阅读并理解】</strong></p><ul><li><strong>纯教育目的</strong>:本模拟器仅用于理论教学和辅助理解 CCR 的运行逻辑。其生成的任何数据、曲线或警告均基于数学模型,与真实的生理反应及物理环境存在差异。</li><li><strong>非生命支持工具</strong>:<strong>严禁</strong>在任何真实的潜水活动(包括但不限于水下导航、减压计算或气体计划)中使用本软件或将其作为决策参考。</li><li><strong>无担保声明</strong>:开发者对模拟结果的准确性、可靠性或完整性不作任何明示或暗示的保证。</li><li><strong>免责</strong>:因使用或误用本工具而导致的任何事故、伤害、设备损坏或其他损失,开发者概不承担责任。</li></ul><hr><h2>4. 法律声明</h2><ul><li><strong>版权所有</strong>:本软件及其所有相关内容(包括但不限于代码、设计、音频及文档)的知识产权均归 <strong>POWERGX INC.</strong> 及 <strong>雪夜叉</strong> 独家所有,受国际版权法及相关法律保护。</li><li><strong>使用许可</strong>:用户仅获得个人的、非商业性的使用权利。未经开发者书面许可,禁止对本软件进行逆向工程、反编译、修改、分发或利用本软件进行任何商业牟利行为。</li><li><strong>技术声明</strong>:<ul><li>代谢模型为简化版本。</li><li><strong>不含 ADV/OPV</strong>:为聚焦气体逻辑学习,本模拟<strong>未包含</strong>自动稀释阀 (ADV) 及过压阀 (OPV) 的动态行为。</li></ul></li><li><strong>权利保留</strong>:开发者保留对本文档及软件的最终解释权与修改权。</li></ul><h2>5. 联系与定制</h2><ul><li><strong>Bug 反馈与建议</strong>:<ul><li><a href="mailto:myron.yu@powergx.co.jp">myron.yu@powergx.co.jp</a></li></ul></li><li><strong>商业合作咨询</strong>:<ul><li><a href="mailto:info@powergx.co.jp">info@powergx.co.jp</a></li><li>欢迎指导机构(PADI、TDI、GUE 等)及潜水中心洽谈商业授权或白标定制(品牌专属 UI、独立算法实现)。</li></ul></li><li><strong>致谢与支持</strong>:<ul><li>致 CCR 教练:本工具可在您的课堂中自由使用。</li><li><strong>POWERGX FLUIDICS LAB</strong> 免费提供本工具。如果您认可我们的工作,欢迎了解我们为追求极致性能的技术潜水员打造的 <strong>TRIGGERFISH DPV</strong>。</li></ul></li></ul><blockquote style="border-left: 4px solid #ff4444; padding-left: 15px; color: #ff4444; font-weight: bold;"><strong>⚠️ 警告</strong><br>潜水是一项具有潜在危险的活动。任何软件都无法替代正规培训。请务必接受认证机构的专业指导。</blockquote>`;
+
+            // English Documentation  
+            document.getElementById('doc-en-text').innerHTML = `<h1>CCR PPO2 Simulator: User Manual & Legal Notice</h1><h2>1. Access & Installation</h2><ul><li><strong>Online Access</strong>: Launch simulation via browser at <a href="https://powergx-yu.github.io/ccr-ppo2sim/" target="_blank">https://powergx-yu.github.io/ccr-ppo2sim/</a></li><li><strong>Platform Support & Offline Access (PWA)</strong>:<ul><li><strong>Cross-Platform</strong>: Fully compatible with <strong>PC/Mac</strong> (Chrome/Edge/Safari), <strong>Android</strong> (Chrome), and <strong>iOS/iPadOS</strong> (Safari).</li><li><strong>Offline Capability</strong>: Supports <strong>PWA (Progressive Web App)</strong> for full offline functionality.<ul><li><strong>To Install</strong>: Select "Add to Home Screen" or "Install App" from your browser's menu.</li><li><strong>Offline Use</strong>: Once installed, the app functions seamlessly in "Airplane Mode" or remote locations without internet access.</li></ul></li></ul></li></ul><h2>2. User Guide</h2><p>This tool provides a dynamic simulation of oxygen partial pressure (PPO2) mechanics in a Closed Circuit Rebreather (CCR), designed to help divers visualize loop logic and practice emergency management protocols.</p><h3>Core Systems</h3><ul><li><strong>Target SP (Setpoint)</strong>:<ul><li><strong>Visual Reference</strong>: Represents the diver's intended PPO2 level.</li><li><strong>Guideline Only</strong>: Acts as a visual baseline on the HUD, helping divers instantly recognize deviation from their optimal loop status.</li></ul></li><li><strong>Depth</strong>:<ul><li>Simulates the physics of ambient pressure changes (Dalton's Law), compressing the gas volume and increasing PPO2 during descent.</li></ul></li><li><strong>Diluent Gas</strong>:<ul><li><strong>Presets</strong>: Standard technical mixes including <strong>Air</strong>, <strong>Tx 18/45</strong>, and <strong>Tx 10/70</strong>.</li><li><strong>Custom Mix</strong>: Allows manual configuration of O2% and He% to model custom gas strategies and observe their effects on PPO2 and END (Equivalent Narcotic Depth).</li></ul></li><li><strong>Metabolic Rate (Workload)</strong>:<ul><li><strong>SAC Display</strong>: work rate is primarily displayed as <strong>SAC (Surface Air Consumption)</strong>—a metric familiar to most divers—alongside the equivalent <strong>VO2 (Oxygen Uptake)</strong>.</li><li><strong>Scenarios</strong>: Presets range from <strong>Rest</strong>, <strong>Norm</strong> (Cruising), <strong>Work</strong>, <strong>Stress</strong>, to <strong>Panic</strong>, simulating oxygen burn rates under various conditions.</li><li><strong>Custom Input</strong>: Supports precise SAC/VO2 entry for theoretical modeling or extreme stress testing.</li></ul></li><li><strong>Injection System (mCCR / eCCR / Hybrid)</strong>:<ul><li><strong>MAV (Manual Addition Valve)</strong>:<ul><li><em>Universal Availability</em>: Manual O2 and Diluent injection is available in <strong>all modes</strong>.</li><li><em>Function</em>: Used for manual setpoint maintenance, loop flushing, or as a failsafe during electronics failure.</li></ul></li><li><strong>mCCR (Mechanical CCR)</strong>:<ul><li><strong>CMF (Constant Mass Flow)</strong>: Simulates a "leaky valve" constant flow of oxygen. The needle valve is tuned to match the diver's metabolic rate, minimizing the need for manual injection.</li></ul></li><li><strong>eCCR (Electronic CCR)</strong>:<ul><li><strong>Solenoid</strong>: Computer-controlled injection. The controller enforces a <strong>Low Setpoint</strong> threshold; if PPO2 drops below this value, the solenoid fires to restore it.</li></ul></li><li><strong>Hybrid Mode</strong>:<ul><li>Combines mCCR's continuous flow with eCCR's safety net. The CMF maintains baseline O2, while the solenoid acts as a "parachute" if PPO2 drops too low.</li><li><strong>Anti-Spike Logic</strong>: To prevent rapid PPO2 spikes when CMF and Solenoid overlap, the solenoid's firing duration is reduced by ~50% in this mode (mimicking real-world hybrid logic).</li></ul></li></ul></li></ul><h3>Monitoring & Feedback</h3><ul><li><strong>Cell Monitoring</strong>: Three independent oxygen sensors simulating a standard CCR handset display.</li><li><strong>Real-time PPO2 Graph</strong>:<ul><li>A scrolling timeline visualizing PPO2 trends.</li><li>Essential for understanding the lag and interaction between depth changes, metabolism, and injections.</li></ul></li><li><strong>Visual Feedback</strong>:<ul><li><strong>Gas Injection Sprays</strong>: Dynamic visual cues ("sprays") appear when oxygen or diluent is injected via Solenoid, MAV, or CMF.</li><li>Provides immediate confirmation of <em>what</em> is firing and <em>how often</em>.</li></ul></li><li><strong>Physiological Alarms</strong>:<ul><li><strong>Hyperoxia (CNS)</strong>: Red warning overlay when PPO2 exceeds safe limits (default >1.6), simulating seizure risk.</li><li><strong>Hypoxia</strong>: Purple/Blur effect when PPO2 drops critically low (default <0.16), simulating imminent blackout.</li><li><strong>Narcosis</strong>: Progressive visual blurring based on Narcosis depth (END).</li></ul></li><li><strong>Audio & Immersion</strong>:<ul><li><strong>Ambiance</strong>: Deep ocean background noise.</li><li><strong>Dynamic Breathing</strong>: Breathing rate audio syncs with Workload/VO2—heavier work means heavier breathing.</li><li><strong>Mechanical Sounds</strong>: Authentic audio samples for Solenoid clicks, MAV hisses, and DPV motor whine.</li></ul></li></ul><hr><h2>3. Disclaimer</h2><p><strong>[IMPORTANT: READ BEFORE USE]</strong></p><ul><li><strong>Educational Use Only</strong>: This simulator is a theoretical training aid. While based on real physics, it is a mathematical model and cannot perfectly replicate real-world physiological variability or complex fluid dynamics.</li><li><strong>NOT LIFE SUPPORT</strong>: <strong>DO NOT</strong> use this software for actual dive planning, decompression calculations, or real-world decision making.</li><li><strong>Zero Warranty</strong>: The software is provided "as is". The developers assume no responsibility for data accuracy or reliability.</li><li><strong>Liability</strong>: The developers are not liable for any injury, death, equipment damage, or other losses resulting from the use or misuse of this tool.</li></ul><hr><h2>4. Legal Notice</h2><ul><li><strong>Intellectual Property</strong>: All code, assets, audio, and documentation are the exclusive property of <strong>POWERGX INC.</strong> and <strong>SnowYaksha</strong>. Protected by international copyright law.</li><li><strong>License</strong>: Granted for personal, non-commercial use only. Reverse engineering, decompilation, redistribution, or commercial use without authorization is strictly prohibited.</li><li><strong>Technical Limitations</strong>:<ul><li>Simplified metabolic models.</li><li><strong>No ADV/OPV</strong>: To focus on gas logic, this simulation <strong>excludes</strong> Automatic Diluent Valve (ADV) and Over-Pressure Valve (OPV) mechanics.</li></ul></li><li><strong>Rights</strong>: The developer reserves the right to final interpretation and modification.</li></ul><h2>5. Contact & Customization</h2><ul><li><strong>Bug Reports & Feedback</strong>:<ul><li><a href="mailto:myron.yu@powergx.co.jp">myron.yu@powergx.co.jp</a></li></ul></li><li><strong>Commercial Inquiries</strong>:<ul><li><a href="mailto:info@powergx.co.jp">info@powergx.co.jp</a></li><li>Agencies (PADI, TDI, GUE, etc.) and dive centers are welcome to contact us for commercial licensing or white-label customization (branded UI, custom algorithms).</li></ul></li><li><strong>A Note from the Developers</strong>:<ul><li>To all CCR Instructors: You are welcome to use this tool freely in your classrooms.</li><li><strong>POWERGX FLUIDICS LAB</strong> brings this tool to you for free. If you enjoy our work, please check out our <strong>TRIGGERFISH DPV</strong>—engineered for technical divers who demand uncompromised performance.</li></ul></li></ul><blockquote style="border-left: 4px solid #ff4444; padding-left: 15px; color: #ff4444; font-weight: bold;"><strong>⚠️ WARNING</strong><br>Diving is inherently dangerous. No software can replace proper training. Always seek instruction from a certified agency.</blockquote>`;
+
+            // Japanese Documentation
+            document.getElementById('doc-jp-text').innerHTML = `<h1>CCR PPO2 シミュレーター:ユーザーマニュアルおよび法的通知</h1><h2>1. アクセスとインストール</h2><ul><li><strong>オンライン・シミュレーター</strong>:以下の URL よりブラウザでアクセスしてください。<ul><li><a href="https://powergx-yu.github.io/ccr-ppo2sim/" target="_blank">https://powergx-yu.github.io/ccr-ppo2sim/</a></li></ul></li><li><strong>対応プラットフォームとオフライン利用 (PWA)</strong>:<ul><li><strong>マルチデバイス対応</strong>:<strong>PC/Mac</strong> (Chrome/Edge/Safari)、<strong>Android</strong> (Chrome)、<strong>iOS/iPadOS</strong> (Safari) にて動作確認済みです。</li><li><strong>オフライン動作対応</strong>:本ツールは <strong>PWA (プログレッシブウェブアプリ)</strong> 技術を採用しています。<ul><li><strong>インストール手順</strong>:ブラウザのメニューから「ホーム画面に追加」(iOS) または「アプリをインストール」(Android/PC) を選択してください。</li><li><strong>利用シーン</strong>:インストール後は、機内や電波の届かないへき地のダイブサイトでも、全ての機能をご利用いただけます。</li></ul></li></ul></li></ul><h2>2. 機能ガイド</h2><p>本ツールは、閉鎖式リブリーザー (CCR) 内部の酸素分圧 (PPO2) 変動をシミュレートし、そのロジックや緊急時の挙動を視覚的に理解するためのトレーニング支援ツールです。</p><h3>コアシステム</h3><ul><li><strong>ターゲット設定値 (Target SP)</strong>:<ul><li><strong>目安としてのSP</strong>:ダイバーが目指すべき理想的な PPO2 レベルを指します。</li><li><strong>視覚的リファレンス</strong>:システムによる強制制御ではなく、現状が理想値からどの程度乖離しているかを判断するためのガイドラインとして表示されます。</li></ul></li><li><strong>深度 (Depth)</strong>:<ul><li>深度変化に伴う周囲圧の影響(ドルトンの法則)をシミュレートし、潜降時の PPO2 上昇などを再現します。</li></ul></li><li><strong>希釈ガス (Diluent Gas)</strong>:<ul><li><strong>プリセット</strong>:<strong>Air</strong>、<strong>Tx 18/45</strong>、<strong>Tx 10/70</strong> などの標準的なテクニカルガスを選択可能です。</li><li><strong>カスタム設定</strong>:O2/He の割合を自由に設定し、特殊なガス計画が PPO2 や窒素酔い深度 (END) に与える影響を検証できます。</li></ul></li><li><strong>代謝率・運動強度 (Workload)</strong>:<ul><li><strong>指標</strong>:ダイバーに馴染み深い <strong>SAC (水面空気消費率)</strong> を主要な指標とし、併せて理論的な <strong>VO2 (酸素摂取量)</strong> も表示します。</li><li><strong>シナリオ</strong>:<strong>Rest</strong> (安静)、<strong>Norm</strong> (巡航)、<strong>Work</strong> (作業)、<strong>Stress</strong> (ストレス下)、<strong>Panic</strong> (極限状態) の5段階で、酸素消費量の変化を再現します。</li><li><strong>詳細入力</strong>:特定の SAC 値を数値入力することで、限界状況のシミュレーションも可能です。</li></ul></li><li><strong>酸素注入システム (Injection System)</strong>:<ul><li><strong>MAV (手動注入弁)</strong>:<ul><li><em>全モード共通</em>:O2 および Diluent の手動注入は、モードに関わらず常に可能です。</li><li><em>用途</em>:セットポイントの維持、ループ内ガスのフラッシング、または電子制御故障時のマニュアル操作練習に使用します。</li></ul></li><li><strong>mCCR (機械式定流量制御)</strong>:<ul><li><strong>CMF (定質量流量)</strong>:ニードルバルブからの「漏れ」を利用した持続的な酸素供給です。ダイバーの代謝量に合わせて流量を調整し、手動操作の頻度を下げます。</li></ul></li><li><strong>eCCR (電子制御)</strong>:<ul><li><strong>ソレノイド</strong>:コンピューター制御による自動注入です。「下限セットポイント (Low SP)」を下回ると自動的に作動し、PPO2 を回復させます。</li></ul></li><li><strong>Hybrid (ハイブリッド)</strong>:<ul><li>mCCR の持続流と eCCR の安全装置を組み合わせたモードです。通常は CMF で維持し、PPO2 が低下した場合のみソレノイドが「パラシュート」として介入します。</li><li><strong>スパイク防止機能</strong>:CMF とソレノイドが重複して作動した際の急激な PPO2 上昇を防ぐため、このモードではソレノイドの作動時間が通常の約 50% に短縮されます。</li></ul></li></ul></li></ul><h3>モニタリングとフィードバック</h3><ul><li><strong>セル監視</strong>:3つの独立した酸素センサー数値をリアルタイム表示し、ハンドセットの挙動を模倣します。</li><li><strong>PPO2 経過グラフ</strong>:<ul><li>過去の変動を時系列で可視化します。</li><li>深度変化、呼吸代謝、ガス注入のタイムラグや相互作用を理解するのに最適です。</li></ul></li><li><strong>注入ビジュアル</strong>:<ul><li><strong>ガススプレー効果</strong>:ソレノイド、MAV、CMF からガスが注入されると、画面上でリアルタイムに「スプレー」が表示されます。何が、どの程度の頻度で作動しているかが一目で分かります。</li></ul></li><li><strong>生理学的アラーム</strong>:<ul><li><strong>高酸素 (CNS)</strong>:PPO2 が安全域 (例: >1.6) を超えると赤色の警告が出現し、痙攣リスクを警告します。</li><li><strong>低酸素 (Hypoxia)</strong>:PPO2 が危険域 (例: <0.16) まで低下すると視界が紫色にぼやけ、意識喪失(ブラックアウト)を表現します。</li><li><strong>窒素酔い</strong>:END 深度に応じて視界が不明瞭になるエフェクトがかかります。</li></ul></li><li><strong>オーディオと没入感</strong>:<ul><li><strong>環境音</strong>:深海のアンビエントノイズ。</li><li><strong>呼吸音</strong>:運動強度 (VO2) に連動して呼吸音が変化します。負荷が高いほど荒い呼吸になります。</li><li><strong>メカニカル音</strong>:ソレノイドの作動音、MAV の吸気音、DPV のモーター音などをリアルに再現しています。</li></ul></li></ul><hr><h2>3. 免責事項</h2><p><strong>【重要:使用前に必ずご確認ください】</strong></p><ul><li><strong>教育目的限定</strong>:本シミュレーターは、CCR の理論学習支援を目的としたものです。物理法則に基づいてはいますが、あくまで数学モデルであり、実際の人体の複雑な反応や流体力学を完全に再現するものではありません。</li><li><strong>生命維持には使用不可</strong>:実潜水における計画、減圧計算、または意思決定の根拠として本ソフトを使用することは<strong>固く禁じます</strong>。</li><li><strong>無保証</strong>:本ソフトウェアは「現状のまま」提供されます。開発者はシミュレーション結果の正確性や信頼性についていかなる保証も行いません。</li><li><strong>免責</strong>:本ツールの使用または誤用によって生じたいかなる事故、怪我、機器の破損、その他の損害について、開発者は一切の責任を負いません。</li></ul><hr><h2>4. 法的通知</h2><ul><li><strong>知的財産権</strong>:本コード、デザイン、音声アセット、ドキュメントの権利はすべて <strong>POWERGX INC.</strong> および <strong>SnowYaksha (雪夜叉)</strong> に帰属します。国際著作権法により保護されています。</li><li><strong>利用ライセンス</strong>:個人的かつ非営利的な利用に限り許可されます。許可なきリバースエンジニアリング、再配布、または商用利用は厳禁です。</li><li><strong>技術的制限事項</strong>:<ul><li>代謝モデルは簡易化されています。</li><li><strong>ADV/OPV 非搭載</strong>:ガスロジックの学習に焦点を絞るため、自動希釈弁 (ADV) および過圧弁 (OPV) の挙動はシミュレーションに<strong>含まれていません</strong>。</li></ul></li><li><strong>権利留保</strong>:開発者は本ドキュメントおよびソフトウェアの最終的な解釈権と修正権を留保します。</li></ul><h2>5. お問い合わせ・カスタマイズ</h2><ul><li><strong>不具合報告・フィードバック</strong>:<ul><li><a href="mailto:myron.yu@powergx.co.jp">myron.yu@powergx.co.jp</a></li></ul></li><li><strong>法人・商用利用について</strong>:<ul><li><a href="mailto:info@powergx.co.jp">info@powergx.co.jp</a></li><li>指導団体 (PADI, TDI, GUE 等) やダイブセンター向けの商用ライセンス、およびホワイトラベル(ブランド専用 UI や独自アルゴリズム実装)のカスタマイズ開発も承っております。</li></ul></li><li><strong>開発者からのメッセージ</strong>:<ul><li>CCR インストラクターの皆様へ:本ツールは講習等でご自由にお使いいただけます。</li><li><strong>POWERGX FLUIDICS LAB</strong> は、このツールを無償で提供しています。もし私たちの取り組みに共感していただけましたら、妥協なき性能を求めるテクニカルダイバーのために設計された <strong>TRIGGERFISH DPV</strong> を、ぜひご検討ください。</li></ul></li></ul><blockquote style="border-left: 4px solid #ff4444; padding-left: 15px; color: #ff4444; font-weight: bold;"><strong>⚠️ 警告</strong><br>ダイビングは潜在的な危険を伴う活動です。いかなるソフトウェアも、適切な実技トレーニングの代わりにはなりません。必ず認定された指導団体の講習を受けてください。</blockquote>`;
         }
 
         // --- 音频管理器 ---
