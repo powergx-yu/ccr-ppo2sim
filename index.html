@@ -2609,7 +2609,7 @@
             const title = document.getElementById('alert-title'), list = document.getElementById('alert-list'), endDisp = document.getElementById('disp-end');
             let end = Math.max(0, (params.depthM + 10) * (1 - params.diluentFHe) - 10);
             endDisp.innerText = end.toFixed(0) + "m";
-            visual.className = 'diver-visual-wrapper';
+            visual.classList.remove('state-hyperoxia', 'state-hypoxia', 'state-narcosis');
             panel.className = 'hud-screen hud-right status-ok'; title.innerText = "STATUS: OK"; title.style.color = "var(--accent-green)";
             list.innerHTML = "<li>Life Support Normal</li>";
 
@@ -2791,9 +2791,10 @@
                 installBtn.innerText = "已安装";
                 installBtn.style.display = 'none';
             });
+
+            window.addEventListener('keydown', e => { if (e.code === 'ArrowUp' || e.code === 'KeyO') startInject('o2'); if (e.code === 'ArrowDown' || e.code === 'KeyD') startInject('dil'); });
+            window.addEventListener('keyup', e => { if (e.code === 'ArrowUp' || e.code === 'KeyO') stopInject(); if (e.code === 'ArrowDown' || e.code === 'KeyD') stopInject(); });
         };
-        window.addEventListener('keydown', e => { if (e.code === 'ArrowUp' || e.code === 'KeyO') startInject('o2'); if (e.code === 'ArrowDown' || e.code === 'KeyD') startInject('dil'); });
-        window.addEventListener('keyup', e => { if (e.code === 'ArrowUp' || e.code === 'KeyO') stopInject(); if (e.code === 'ArrowDown' || e.code === 'KeyD') stopInject(); });
     </script>
 </body>
 
